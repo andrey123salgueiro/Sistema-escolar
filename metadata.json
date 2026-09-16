@@ -1,0 +1,6 @@
+{
+  "name": "Pré-Conselho Escolar Digital",
+  "description": "Sistema digital de preenchimento, organização e arquivamento de fichas de pré-conselho de classe da Escola Estadual do Campo Frei Graciano Droessler.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
