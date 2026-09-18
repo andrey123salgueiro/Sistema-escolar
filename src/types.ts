@@ -45,7 +45,7 @@ export interface PreCouncilReport {
   date: string; // Formato YYYY-MM-DD
   bimester: string; // 1º Bimestre, 2º Bimestre, etc.
   answers: Record<string, string>; // questionId -> response
-  status: 'rascunho' | 'enviado' | 'visto';
+  status: 'pendente' | 'rascunho' | 'enviado' | 'visto';
   createdAt: string;
   updatedAt: string;
   pedagogaSignature: SignatureStatus;

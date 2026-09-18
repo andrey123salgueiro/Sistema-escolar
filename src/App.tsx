@@ -25,6 +25,7 @@ import { TeacherReportList } from './components/TeacherReportList';
 import { DirectorDashboard } from './components/DirectorDashboard';
 import { TeacherManagement } from './components/TeacherManagement';
 import { QuestionManagement } from './components/QuestionManagement';
+import { ReleaseReportManagement } from './components/ReleaseReportManagement';
 import { ReportViewModal } from './components/ReportViewModal';
 import { CheckCircle2 } from 'lucide-react';
 
@@ -72,7 +73,7 @@ export default function App() {
       if (activeUser.role === 'diretora') {
         setActiveTab('archive');
       } else {
-        setActiveTab('new-form');
+        setActiveTab('my-reports');
       }
     }
   }, []);
@@ -87,7 +88,7 @@ export default function App() {
       setActiveTab('archive');
       showToast(`Bem-vinda, ${user.name}! Painel da Diretoria acessado com sucesso.`);
     } else {
-      setActiveTab('new-form');
+      setActiveTab('my-reports');
       showToast(`Bem-vindo(a), Prof. ${user.name}! Painel docente acessado.`);
     }
   };
@@ -282,6 +283,25 @@ export default function App() {
     saveStoredSections(updated);
   };
 
+  // Release and dispatch management actions
+  const handleReleaseReports = (newReports: PreCouncilReport[]) => {
+    const updated = [...newReports, ...reports];
+    setReports(updated);
+    saveStoredReports(updated);
+    showToast(
+      `${newReports.length} ${
+        newReports.length === 1 ? 'ficha disponibilizada' : 'fichas disponibilizadas'
+      } com sucesso para os professores!`
+    );
+  };
+
+  const handleCancelRelease = (reportId: string) => {
+    const updated = reports.filter((r) => r.id !== reportId);
+    setReports(updated);
+    saveStoredReports(updated);
+    showToast('Liberação da ficha cancelada.');
+  };
+
   // If user is not authenticated, show login screen
   if (!currentUser) {
     return (
@@ -343,6 +363,16 @@ export default function App() {
               />
             )}
 
+            {activeTab === 'release' && (
+              <ReleaseReportManagement
+                teachers={onlyTeachers}
+                reports={reports}
+                onReleaseReports={handleReleaseReports}
+                onCancelRelease={handleCancelRelease}
+                onOpenReport={(rep) => setViewingReport(rep)}
+              />
+            )}
+
             {activeTab === 'teachers' && (
               <TeacherManagement
                 teachers={onlyTeachers}
@@ -388,11 +418,6 @@ export default function App() {
                 onOpenReport={(rep) => setViewingReport(rep)}
                 onEditReport={(rep) => {
                   setEditingReport(rep);
-                  setActiveTab('new-form');
-                }}
-                onDeleteReport={handleDeleteReport}
-                onNewReport={() => {
-                  setEditingReport(null);
                   setActiveTab('new-form');
                 }}
                 onPrintReport={(rep) => {

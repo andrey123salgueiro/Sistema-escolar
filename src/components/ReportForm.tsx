@@ -24,6 +24,8 @@ import {
   Printer,
   Sparkles,
   Layers,
+  ArrowLeft,
+  Lock,
 } from 'lucide-react';
 
 interface ReportFormProps {
@@ -63,6 +65,16 @@ export const ReportForm: React.FC<ReportFormProps> = ({
   );
   const [saveSuccessMsg, setSaveSuccessMsg] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (existingReport) {
+      setComponent(existingReport.component);
+      setClassGroup(existingReport.classGroup);
+      setDate(existingReport.date || new Date().toISOString().split('T')[0]);
+      setBimester(existingReport.bimester);
+      setAnswers(existingReport.answers || {});
+    }
+  }, [existingReport]);
 
   // Calculate completion percentage
   const totalQuestions = questions.length;
@@ -180,6 +192,27 @@ export const ReportForm: React.FC<ReportFormProps> = ({
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
+      {/* Back to list navigation */}
+      <div className="mb-4 flex items-center justify-between">
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="inline-flex items-center gap-2 text-xs font-semibold text-stone-600 hover:text-stone-900 bg-white hover:bg-stone-100 border border-stone-200 px-3.5 py-2 rounded-xl transition-colors shadow-xs"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Voltar para Minhas Fichas</span>
+          </button>
+        )}
+
+        {existingReport && (
+          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 font-semibold">
+            <Lock className="w-3.5 h-3.5 text-amber-700" />
+            <span>Ficha autorizada pela Direção: {classGroup} • {component}</span>
+          </div>
+        )}
+      </div>
+
       {/* Top Banner Alert for teacher */}
       <div className="mb-6 bg-amber-50/80 border border-amber-200 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-amber-900 shadow-xs">
         <div className="flex items-center gap-2.5">

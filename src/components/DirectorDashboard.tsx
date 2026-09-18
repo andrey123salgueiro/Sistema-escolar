@@ -40,17 +40,20 @@ export const DirectorDashboard: React.FC<DirectorDashboardProps> = ({
   const [selectedBimester, setSelectedBimester] = useState('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'signed'>('all');
 
+  // Only consider reports that have been submitted or signed for the digital archive
+  const archivedReports = reports.filter((r) => r.status === 'enviado' || r.status === 'visto');
+
   // Statistics
-  const totalReports = reports.length;
-  const pendingDirectorReview = reports.filter((r) => !r.diretoraSignature?.signed).length;
-  const fullySigned = reports.filter((r) => r.diretoraSignature?.signed).length;
+  const totalReports = archivedReports.length;
+  const pendingDirectorReview = archivedReports.filter((r) => !r.diretoraSignature?.signed).length;
+  const fullySigned = archivedReports.filter((r) => r.diretoraSignature?.signed).length;
 
   // Unique lists for filters
-  const classesList = Array.from(new Set(reports.map((r) => r.classGroup))).sort();
-  const bimestersList = Array.from(new Set(reports.map((r) => r.bimester))).sort();
+  const classesList = Array.from(new Set(archivedReports.map((r) => r.classGroup))).sort();
+  const bimestersList = Array.from(new Set(archivedReports.map((r) => r.bimester))).sort();
 
   // Filtered reports
-  const filteredReports = reports.filter((r) => {
+  const filteredReports = archivedReports.filter((r) => {
     if (selectedClass !== 'all' && r.classGroup !== selectedClass) return false;
     if (selectedTeacher !== 'all' && r.teacherId !== selectedTeacher) return false;
     if (selectedBimester !== 'all' && r.bimester !== selectedBimester) return false;

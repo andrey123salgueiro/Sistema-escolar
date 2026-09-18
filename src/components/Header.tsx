@@ -11,6 +11,8 @@ import {
   Archive,
   RefreshCw,
   ShieldCheck,
+  Send,
+  Edit3,
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -126,6 +128,18 @@ export const Header: React.FC<HeaderProps> = ({
                     <span>Relatórios Arquivados</span>
                   </button>
                   <button
+                    id="tab-diretora-release"
+                    onClick={() => onSelectTab('release')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all ${
+                      activeTab === 'release'
+                        ? 'bg-white text-stone-900 shadow-xs font-semibold'
+                        : 'hover:text-stone-900'
+                    }`}
+                  >
+                    <Send className="w-3.5 h-3.5 text-purple-600" />
+                    <span>Liberar Fichas</span>
+                  </button>
+                  <button
                     id="tab-diretora-teachers"
                     onClick={() => onSelectTab('teachers')}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all ${
@@ -152,18 +166,16 @@ export const Header: React.FC<HeaderProps> = ({
                 </>
               ) : (
                 <>
-                  <button
-                    id="tab-teacher-new"
-                    onClick={() => onSelectTab('new-form')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all ${
-                      activeTab === 'new-form'
-                        ? 'bg-white text-stone-900 shadow-xs font-semibold'
-                        : 'hover:text-stone-900'
-                    }`}
-                  >
-                    <PlusCircle className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Preencher Nova Ficha</span>
-                  </button>
+                  {activeTab === 'new-form' && (
+                    <button
+                      id="tab-teacher-editing"
+                      onClick={() => onSelectTab('new-form')}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white text-stone-900 shadow-xs font-semibold"
+                    >
+                      <Edit3 className="w-3.5 h-3.5 text-amber-600" />
+                      <span>Preenchendo Ficha</span>
+                    </button>
+                  )}
                   <button
                     id="tab-teacher-my-reports"
                     onClick={() => onSelectTab('my-reports')}
