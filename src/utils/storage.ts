@@ -20,14 +20,31 @@ export function getStoredUsers(): User[] {
       return INITIAL_USERS;
     }
     const parsed: User[] = JSON.parse(raw);
-    // Ensure all users have passwords populated
+    let hasChanges = false;
+    // Ensure all users have passwords populated and diretora has username admin
     const fixed = parsed.map((u) => {
-      if (!u.password) {
-        const init = INITIAL_USERS.find((iu) => iu.id === u.id);
-        return { ...u, password: init?.password || '123' };
+      let updatedUser = { ...u };
+      if (u.role === 'diretora') {
+        if (updatedUser.username !== 'admin') {
+          updatedUser.username = 'admin';
+          hasChanges = true;
+        }
+        if (updatedUser.password !== '123') {
+          updatedUser.password = '123';
+          hasChanges = true;
+        }
+      } else {
+        if (!updatedUser.password) {
+          updatedUser.password = '123';
+          hasChanges = true;
+        }
       }
-      return u;
+      return updatedUser;
     });
+
+    if (hasChanges) {
+      localStorage.setItem(USERS_KEY, JSON.stringify(fixed));
+    }
     return fixed;
   } catch (e) {
     console.error('Failed to parse stored users', e);

@@ -190,6 +190,18 @@ export const ReportForm: React.FC<ReportFormProps> = ({
   // Sort sections and questions
   const sortedSections = [...sections].sort((a, b) => a.order - b.order);
 
+  // Map each question to a continuous number (Questão 1, Questão 2, ...)
+  const questionNumberMap = new Map<string, number>();
+  let runningIndex = 1;
+  sortedSections.forEach((sec) => {
+    const secQuestions = questions
+      .filter((q) => q.sectionId === sec.id)
+      .sort((a, b) => a.order - b.order);
+    secQuestions.forEach((q) => {
+      questionNumberMap.set(q.id, runningIndex++);
+    });
+  });
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
       {/* Back to list navigation */}
@@ -402,27 +414,33 @@ export const ReportForm: React.FC<ReportFormProps> = ({
                   {sectionQuestions.map((q) => {
                     const currentVal = answers[q.id] || '';
                     const isAnswered = currentVal.trim().length > 0;
+                    const qNum = questionNumberMap.get(q.id) || q.order;
 
                     return (
                       <div key={q.id} className="group">
                         <div className="flex items-start justify-between gap-2 mb-2">
                           <label
                             htmlFor={`q-${q.id}`}
-                            className="text-xs sm:text-sm font-semibold text-stone-800 leading-snug cursor-pointer"
+                            className="text-xs sm:text-sm font-semibold text-stone-800 leading-snug cursor-pointer flex items-start gap-2"
                           >
-                            {q.prompt}
-                            {q.required && (
-                              <span
-                                className="text-red-600 ml-1 font-bold"
-                                title="Campo obrigatório"
-                              >
-                                *
-                              </span>
-                            )}
+                            <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-md bg-stone-100 border border-stone-200 text-stone-700 font-bold text-xs font-sans shrink-0">
+                              Questão {qNum}
+                            </span>
+                            <span className="mt-0.5">
+                              {q.prompt}
+                              {q.required && (
+                                <span
+                                  className="text-red-600 ml-1 font-bold"
+                                  title="Campo obrigatório"
+                                >
+                                  *
+                                </span>
+                              )}
+                            </span>
                           </label>
 
                           {isAnswered && (
-                            <span className="shrink-0 flex items-center gap-1 text-[11px] text-emerald-600 font-medium bg-emerald-50 px-2 py-0.5 rounded-full">
+                            <span className="shrink-0 flex items-center gap-1 text-[11px] text-emerald-600 font-medium bg-emerald-50 px-2 py-0.5 rounded-full mt-0.5">
                               <CheckCircle2 className="w-3 h-3" />
                               Preenchido
                             </span>

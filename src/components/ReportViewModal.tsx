@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PreCouncilReport, Question, QuestionSection, User } from '../types';
 import {
   Printer,
@@ -44,6 +44,15 @@ export const ReportViewModal: React.FC<ReportViewModalProps> = ({
   );
   const [showNotesForm, setShowNotesForm] = useState(false);
 
+  // Prevent background scrolling while modal is open
+  useEffect(() => {
+    const origOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = origOverflow;
+    };
+  }, []);
+
   const isDiretora = currentUser.role === 'diretora';
 
   const handlePrint = () => {
@@ -63,12 +72,30 @@ export const ReportViewModal: React.FC<ReportViewModalProps> = ({
   // Group questions by section
   const sortedSections = [...sections].sort((a, b) => a.order - b.order);
 
+  // Map each question to a continuous number (Questão 1, Questão 2, ...)
+  const questionNumberMap = new Map<string, number>();
+  let runningIndex = 1;
+  sortedSections.forEach((sec) => {
+    const secQuestions = questions
+      .filter((q) => q.sectionId === sec.id)
+      .sort((a, b) => a.order - b.order);
+    secQuestions.forEach((q) => {
+      questionNumberMap.set(q.id, runningIndex++);
+    });
+  });
+
+  // Handle any questions whose sectionId might not match known sections
+  const knownSectionIds = new Set(sections.map((s) => s.id));
+  const orphanedQuestions = questions.filter(
+    (q) => !knownSectionIds.has(q.sectionId)
+  );
+
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 print:p-0 print:bg-white print:static">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex justify-center items-start p-2 sm:p-4 py-4 sm:py-8 print:p-0 print:bg-white print:static">
       {/* Container */}
-      <div className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl border border-stone-200 overflow-hidden my-6 print:m-0 print:border-none print:shadow-none print:rounded-none">
+      <div className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl border border-stone-200 overflow-hidden my-2 sm:my-4 print:m-0 print:border-none print:shadow-none print:rounded-none">
         {/* Modal Top Bar (Hidden on print) */}
-        <div className="bg-stone-900 text-stone-100 px-6 py-3 flex items-center justify-between print:hidden">
+        <div className="sticky top-0 z-20 bg-stone-900 text-stone-100 px-6 py-3 flex items-center justify-between print:hidden shadow-md">
           <div className="flex items-center gap-2 text-xs">
             <span className="font-semibold text-amber-400">
               Visualização Oficial do Documento
@@ -101,7 +128,7 @@ export const ReportViewModal: React.FC<ReportViewModalProps> = ({
 
         {/* Action ribbon for Director if not yet signed (Hidden on print) */}
         {isDiretora && (!report.diretoraSignature?.signed || !report.pedagogaSignature?.signed) && (
-          <div className="bg-amber-50 border-b border-amber-200 px-6 py-3 flex flex-wrap items-center justify-between gap-3 text-xs print:hidden">
+          <div className="sticky top-[48px] z-10 bg-amber-50 border-b border-amber-200 px-6 py-3 flex flex-wrap items-center justify-between gap-3 text-xs print:hidden shadow-xs">
             <div className="flex items-center gap-2 text-amber-900">
               <FileCheck className="w-4 h-4 text-amber-700 shrink-0" />
               <span>
@@ -197,27 +224,33 @@ export const ReportViewModal: React.FC<ReportViewModalProps> = ({
               return (
                 <div
                   key={sec.id}
-                  className="border border-stone-300 rounded-xl p-5 bg-stone-50/40 page-break-inside-avoid"
+                  className="border border-stone-300 rounded-xl p-5 bg-stone-50/40 page-break-inside-avoid shadow-xs"
                 >
                   <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-stone-900 border-b border-stone-200 pb-2 mb-4 font-serif flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-stone-700 print:bg-black" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-600 print:bg-black" />
                     {sec.title}
                   </h3>
 
-                  <div className="space-y-4">
+                  <div className="space-y-5">
                     {secQuestions.map((q) => {
                       const ans = report.answers[q.id];
+                      const qNum = questionNumberMap.get(q.id) || q.order;
                       return (
                         <div key={q.id} className="text-xs leading-relaxed">
-                          <p className="font-semibold text-stone-800 mb-1.5">
-                            {q.prompt}
-                          </p>
-                          <div className="bg-white border border-stone-200 rounded-lg p-3 text-stone-900 font-sans min-h-[48px] whitespace-pre-wrap">
+                          <div className="flex items-start gap-2 mb-1.5">
+                            <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-md bg-amber-100 border border-amber-300 text-amber-900 font-bold text-xs font-sans shrink-0 print:bg-stone-200 print:text-stone-900 print:border-stone-400">
+                              Questão {qNum}
+                            </span>
+                            <p className="font-semibold text-stone-900 text-xs sm:text-sm mt-0.5 leading-snug">
+                              {q.prompt}
+                            </p>
+                          </div>
+                          <div className="bg-white border border-stone-300 rounded-lg p-3.5 text-stone-900 font-sans min-h-[50px] whitespace-pre-wrap leading-relaxed">
                             {ans && ans.trim().length > 0 ? (
                               ans
                             ) : (
                               <span className="text-stone-400 italic">
-                                Não informado ou sem observações registradas.
+                                Não informado ou sem observações registradas pelo professor.
                               </span>
                             )}
                           </div>
@@ -228,6 +261,43 @@ export const ReportViewModal: React.FC<ReportViewModalProps> = ({
                 </div>
               );
             })}
+
+            {/* Any questions not matching defined sections */}
+            {orphanedQuestions.length > 0 && (
+              <div className="border border-stone-300 rounded-xl p-5 bg-stone-50/40 page-break-inside-avoid shadow-xs">
+                <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-stone-900 border-b border-stone-200 pb-2 mb-4 font-serif flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-stone-700 print:bg-black" />
+                  Outras Questões Registradas
+                </h3>
+                <div className="space-y-5">
+                  {orphanedQuestions.map((q) => {
+                    const ans = report.answers[q.id];
+                    const qNum = questionNumberMap.get(q.id) || q.order;
+                    return (
+                      <div key={q.id} className="text-xs leading-relaxed">
+                        <div className="flex items-start gap-2 mb-1.5">
+                          <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-md bg-stone-200 border border-stone-300 text-stone-800 font-bold text-xs font-sans shrink-0">
+                            Questão {qNum}
+                          </span>
+                          <p className="font-semibold text-stone-900 text-xs sm:text-sm mt-0.5 leading-snug">
+                            {q.prompt}
+                          </p>
+                        </div>
+                        <div className="bg-white border border-stone-300 rounded-lg p-3.5 text-stone-900 font-sans min-h-[50px] whitespace-pre-wrap leading-relaxed">
+                          {ans && ans.trim().length > 0 ? (
+                            ans
+                          ) : (
+                            <span className="text-stone-400 italic">
+                              Não informado ou sem observações registradas.
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Official Signatures Block (Matches exact lines from the 2nd photo) */}
