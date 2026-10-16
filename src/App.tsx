@@ -648,11 +648,16 @@ export default function App() {
               <TeacherReportList
                 currentUser={currentUser}
                 reports={reports}
+                onEditReport={(rep) => {
+                  setEditingReport(rep);
+                  setActiveTab('new-form');
+                }}
                 onFillReport={(rep) => {
                   setEditingReport(rep);
                   setActiveTab('new-form');
                 }}
                 onOpenReport={(rep) => setViewingReport(rep)}
+                onPrintReport={(rep) => setViewingReport(rep)}
                 onDeleteReport={handleDeleteReport}
                 onStartNewReport={() => {
                   setEditingReport(null);
@@ -669,6 +674,7 @@ export default function App() {
                   sections={sections}
                   students={students}
                   classes={classes}
+                  existingReport={editingReport}
                   editingReport={editingReport}
                   onSaveReport={handleSaveReport}
                   onCancel={() => {

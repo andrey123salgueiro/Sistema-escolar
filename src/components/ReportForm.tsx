@@ -39,6 +39,7 @@ interface ReportFormProps {
   questions: Question[];
   sections: QuestionSection[];
   existingReport?: PreCouncilReport | null;
+  editingReport?: PreCouncilReport | null;
   students?: Student[];
   classes?: SchoolClass[];
   onSaveReport: (report: PreCouncilReport) => void;
@@ -51,49 +52,51 @@ export const ReportForm: React.FC<ReportFormProps> = ({
   questions,
   sections,
   existingReport,
+  editingReport,
   students = [],
   classes = [],
   onSaveReport,
   onCancel,
   onPreview,
 }) => {
+  const activeReport = existingReport || editingReport;
   // Form fields
   const [component, setComponent] = useState(
-    existingReport?.component || currentUser.subject || 'Matemática'
+    activeReport?.component || currentUser.subject || 'Matemática'
   );
   const [classGroup, setClassGroup] = useState(
-    existingReport?.classGroup || currentUser.classes?.[0] || '6º Ano A'
+    activeReport?.classGroup || currentUser.classes?.[0] || '6º Ano A'
   );
   const [date, setDate] = useState(
-    existingReport?.date || new Date().toISOString().split('T')[0]
+    activeReport?.date || new Date().toISOString().split('T')[0]
   );
   const [bimester, setBimester] = useState(
-    existingReport?.bimester || '3º Bimestre'
+    activeReport?.bimester || '3º Bimestre'
   );
   const [answers, setAnswers] = useState<Record<string, string>>(
-    existingReport?.answers || {}
+    activeReport?.answers || {}
   );
   const [dimensionRatings, setDimensionRatings] = useState<Record<string, ConceptRating>>(
-    existingReport?.dimensionRatings || {}
+    activeReport?.dimensionRatings || {}
   );
   const [studentRatings, setStudentRatings] = useState<
     Record<string, { rating: ConceptRating; notes?: string }>
-  >(existingReport?.studentRatings || {});
+  >(activeReport?.studentRatings || {});
 
   const [saveSuccessMsg, setSaveSuccessMsg] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   useEffect(() => {
-    if (existingReport) {
-      setComponent(existingReport.component);
-      setClassGroup(existingReport.classGroup);
-      setDate(existingReport.date || new Date().toISOString().split('T')[0]);
-      setBimester(existingReport.bimester);
-      setAnswers(existingReport.answers || {});
-      setDimensionRatings(existingReport.dimensionRatings || {});
-      setStudentRatings(existingReport.studentRatings || {});
+    if (activeReport) {
+      setComponent(activeReport.component);
+      setClassGroup(activeReport.classGroup);
+      setDate(activeReport.date || new Date().toISOString().split('T')[0]);
+      setBimester(activeReport.bimester);
+      setAnswers(activeReport.answers || {});
+      setDimensionRatings(activeReport.dimensionRatings || {});
+      setStudentRatings(activeReport.studentRatings || {});
     }
-  }, [existingReport]);
+  }, [activeReport]);
 
   // Students of current classGroup
   const currentClassStudents = students.filter((s) => s.classGroup === classGroup);
@@ -135,7 +138,7 @@ export const ReportForm: React.FC<ReportFormProps> = ({
 
   const handleQuickDraftSave = () => {
     const reportToSave: PreCouncilReport = {
-      id: existingReport?.id || `rep-${Date.now()}`,
+      id: activeReport?.id || `rep-${Date.now()}`,
       schoolName: SCHOOL_NAME,
       schoolSubtitle: SCHOOL_SUBTITLE,
       title: REPORT_TITLE,
@@ -149,10 +152,10 @@ export const ReportForm: React.FC<ReportFormProps> = ({
       dimensionRatings,
       studentRatings,
       status: 'rascunho',
-      createdAt: existingReport?.createdAt || new Date().toISOString(),
+      createdAt: activeReport?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      pedagogaSignature: existingReport?.pedagogaSignature || { signed: false },
-      diretoraSignature: existingReport?.diretoraSignature || { signed: false },
+      pedagogaSignature: activeReport?.pedagogaSignature || { signed: false },
+      diretoraSignature: activeReport?.diretoraSignature || { signed: false },
     };
 
     onSaveReport(reportToSave);
@@ -180,7 +183,7 @@ export const ReportForm: React.FC<ReportFormProps> = ({
     setValidationErrors([]);
 
     const reportToSave: PreCouncilReport = {
-      id: existingReport?.id || `rep-${Date.now()}`,
+      id: activeReport?.id || `rep-${Date.now()}`,
       schoolName: SCHOOL_NAME,
       schoolSubtitle: SCHOOL_SUBTITLE,
       title: REPORT_TITLE,
@@ -194,10 +197,10 @@ export const ReportForm: React.FC<ReportFormProps> = ({
       dimensionRatings,
       studentRatings,
       status: 'enviado',
-      createdAt: existingReport?.createdAt || new Date().toISOString(),
+      createdAt: activeReport?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      pedagogaSignature: existingReport?.pedagogaSignature || { signed: false },
-      diretoraSignature: existingReport?.diretoraSignature || { signed: false },
+      pedagogaSignature: activeReport?.pedagogaSignature || { signed: false },
+      diretoraSignature: activeReport?.diretoraSignature || { signed: false },
     };
 
     onSaveReport(reportToSave);
@@ -297,7 +300,7 @@ export const ReportForm: React.FC<ReportFormProps> = ({
           </button>
         )}
 
-        {existingReport && (
+        {activeReport && (
           <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 font-semibold">
             <Lock className="w-3.5 h-3.5 text-amber-700" />
             <span>Ficha autorizada pela Direção: {classGroup} / {component}</span>
@@ -756,9 +759,9 @@ export const ReportForm: React.FC<ReportFormProps> = ({
           <div className="text-xs text-stone-700">
             Status atual:{' '}
             <span className="font-semibold text-stone-800 uppercase">
-              {existingReport?.status === 'visto'
+              {activeReport?.status === 'visto'
                 ? 'Homologado com Visto'
-                : existingReport?.status === 'enviado'
+                : activeReport?.status === 'enviado'
                 ? 'Enviado para a Direção'
                 : 'Em Edição (Rascunho)'}
             </span>

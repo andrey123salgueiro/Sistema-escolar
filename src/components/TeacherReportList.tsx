@@ -21,8 +21,11 @@ interface TeacherReportListProps {
   currentUser: User;
   reports: PreCouncilReport[];
   onOpenReport: (report: PreCouncilReport) => void;
-  onEditReport: (report: PreCouncilReport) => void;
-  onPrintReport: (report: PreCouncilReport) => void;
+  onEditReport?: (report: PreCouncilReport) => void;
+  onFillReport?: (report: PreCouncilReport) => void;
+  onPrintReport?: (report: PreCouncilReport) => void;
+  onDeleteReport?: (reportId: string) => void;
+  onStartNewReport?: () => void;
 }
 
 export const TeacherReportList: React.FC<TeacherReportListProps> = ({
@@ -30,8 +33,13 @@ export const TeacherReportList: React.FC<TeacherReportListProps> = ({
   reports,
   onOpenReport,
   onEditReport,
+  onFillReport,
   onPrintReport,
+  onDeleteReport,
+  onStartNewReport,
 }) => {
+  const handleEdit = onEditReport || onFillReport;
+  const handlePrint = onPrintReport || onOpenReport;
   const [selectedClass, setSelectedClass] = useState<string>('all');
   const [selectedBimester, setSelectedBimester] = useState<string>('all');
 
@@ -189,8 +197,8 @@ export const TeacherReportList: React.FC<TeacherReportListProps> = ({
                   {/* Primary Call to Action */}
                   <div className="pt-3 border-t border-stone-100 mt-2">
                     <button
-                      onClick={() => onEditReport(report)}
-                      className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white text-xs font-bold rounded-xl shadow-xs transition-colors"
+                      onClick={() => (handleEdit ? handleEdit(report) : onOpenReport(report))}
+                      className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer"
                     >
                       <Edit className="w-4 h-4" />
                       <span>
@@ -290,8 +298,8 @@ export const TeacherReportList: React.FC<TeacherReportListProps> = ({
                     </button>
 
                     <button
-                      onClick={() => onPrintReport(report)}
-                      className="flex items-center gap-1 px-3 py-1.5 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg text-xs font-medium transition-colors"
+                      onClick={() => (handlePrint ? handlePrint(report) : onOpenReport(report))}
+                      className="flex items-center gap-1 px-3 py-1.5 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg text-xs font-medium transition-colors cursor-pointer"
                       title="Imprimir / Exportar PDF"
                     >
                       <Printer className="w-3.5 h-3.5" />
