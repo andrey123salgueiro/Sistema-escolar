@@ -4,6 +4,9 @@ import {
   Question,
   QuestionSection,
   PreCouncilReport,
+  Student,
+  SchoolClass,
+  ConceptRating,
 } from '../types';
 import {
   AVAILABLE_CLASSES,
@@ -11,6 +14,7 @@ import {
   SCHOOL_NAME,
   SCHOOL_SUBTITLE,
   REPORT_TITLE,
+  EVALUATION_DIMENSIONS,
 } from '../data/initialData';
 import {
   Save,
@@ -26,6 +30,8 @@ import {
   Layers,
   ArrowLeft,
   Lock,
+  Star,
+  Users,
 } from 'lucide-react';
 
 interface ReportFormProps {
@@ -33,6 +39,8 @@ interface ReportFormProps {
   questions: Question[];
   sections: QuestionSection[];
   existingReport?: PreCouncilReport | null;
+  students?: Student[];
+  classes?: SchoolClass[];
   onSaveReport: (report: PreCouncilReport) => void;
   onCancel?: () => void;
   onPreview?: (report: PreCouncilReport) => void;
@@ -43,6 +51,8 @@ export const ReportForm: React.FC<ReportFormProps> = ({
   questions,
   sections,
   existingReport,
+  students = [],
+  classes = [],
   onSaveReport,
   onCancel,
   onPreview,
@@ -63,6 +73,13 @@ export const ReportForm: React.FC<ReportFormProps> = ({
   const [answers, setAnswers] = useState<Record<string, string>>(
     existingReport?.answers || {}
   );
+  const [dimensionRatings, setDimensionRatings] = useState<Record<string, ConceptRating>>(
+    existingReport?.dimensionRatings || {}
+  );
+  const [studentRatings, setStudentRatings] = useState<
+    Record<string, { rating: ConceptRating; notes?: string }>
+  >(existingReport?.studentRatings || {});
+
   const [saveSuccessMsg, setSaveSuccessMsg] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
@@ -73,8 +90,13 @@ export const ReportForm: React.FC<ReportFormProps> = ({
       setDate(existingReport.date || new Date().toISOString().split('T')[0]);
       setBimester(existingReport.bimester);
       setAnswers(existingReport.answers || {});
+      setDimensionRatings(existingReport.dimensionRatings || {});
+      setStudentRatings(existingReport.studentRatings || {});
     }
   }, [existingReport]);
+
+  // Students of current classGroup
+  const currentClassStudents = students.filter((s) => s.classGroup === classGroup);
 
   // Calculate completion percentage
   const totalQuestions = questions.length;
@@ -87,6 +109,27 @@ export const ReportForm: React.FC<ReportFormProps> = ({
     setAnswers((prev) => ({
       ...prev,
       [questionId]: val,
+    }));
+  };
+
+  const handleDimensionRatingChange = (dimId: string, rating: ConceptRating) => {
+    setDimensionRatings((prev) => ({
+      ...prev,
+      [dimId]: rating,
+    }));
+  };
+
+  const handleStudentRatingChange = (
+    stdId: string,
+    rating: ConceptRating,
+    notes?: string
+  ) => {
+    setStudentRatings((prev) => ({
+      ...prev,
+      [stdId]: {
+        rating,
+        notes: notes !== undefined ? notes : prev[stdId]?.notes || '',
+      },
     }));
   };
 
@@ -103,6 +146,8 @@ export const ReportForm: React.FC<ReportFormProps> = ({
       date,
       bimester,
       answers,
+      dimensionRatings,
+      studentRatings,
       status: 'rascunho',
       createdAt: existingReport?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -146,6 +191,8 @@ export const ReportForm: React.FC<ReportFormProps> = ({
       date,
       bimester,
       answers,
+      dimensionRatings,
+      studentRatings,
       status: 'enviado',
       createdAt: existingReport?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -159,7 +206,7 @@ export const ReportForm: React.FC<ReportFormProps> = ({
   // Helper to pre-fill a demo response to assist rapid testing
   const handleFillDemoAnswers = () => {
     const demo: Record<string, string> = {};
-    questions.forEach((q, idx) => {
+    questions.forEach((q) => {
       if (q.id === 'q-1') {
         demo[q.id] = 'A turma demonstra bom rendimento e assimilação dos conteúdos planejados. Aproximadamente 80% atingiram o nível esperado de aprendizagem.';
       } else if (q.id === 'q-2') {
@@ -179,12 +226,45 @@ export const ReportForm: React.FC<ReportFormProps> = ({
       } else if (q.id === 'q-9') {
         demo[q.id] = 'Turma harmoniosa e com forte potencial para os próximos bimestres com o suporte da equipe pedagógica.';
       } else {
-        demo[q.id] = `Observações detalhadas sobre ${q.prompt.slice(0, 30)}...`;
+        demo[q.id] = `Observações pedagógicas detalhadas sobre ${q.prompt.slice(0, 30)}...`;
       }
     });
     setAnswers(demo);
-    setSaveSuccessMsg('Campos preenchidos automaticamente para teste rápido!');
+
+    // Also fill dimension ratings
+    const demoDims: Record<string, ConceptRating> = {
+      aprendizagem: 'bom',
+      participacao: 'otimo',
+      disciplina: 'bom',
+      tarefas: 'bom',
+      frequencia: 'regular',
+      convivencia: 'otimo',
+    };
+    setDimensionRatings(demoDims);
+
+    // Fill sample student ratings
+    const demoStudents: Record<string, { rating: ConceptRating; notes?: string }> = {};
+    currentClassStudents.forEach((s, idx) => {
+      if (idx === 0) demoStudents[s.id] = { rating: 'otimo', notes: 'Destaque e liderança' };
+      else if (idx === 4) demoStudents[s.id] = { rating: 'regular', notes: 'Necessita reforço' };
+      else if (idx === 8) demoStudents[s.id] = { rating: 'ruim', notes: 'Faltas e tarefas pendentes' };
+      else demoStudents[s.id] = { rating: 'bom' };
+    });
+    setStudentRatings(demoStudents);
+
+    setSaveSuccessMsg('Perguntas e avaliação conceitual preenchidas para teste rápido!');
     setTimeout(() => setSaveSuccessMsg(null), 3000);
+  };
+
+  const handleMarkAllStudentsBom = () => {
+    const updated: Record<string, { rating: ConceptRating; notes?: string }> = {};
+    currentClassStudents.forEach((s) => {
+      updated[s.id] = {
+        rating: 'bom',
+        notes: studentRatings[s.id]?.notes || '',
+      };
+    });
+    setStudentRatings(updated);
   };
 
   // Sort sections and questions
@@ -220,7 +300,7 @@ export const ReportForm: React.FC<ReportFormProps> = ({
         {existingReport && (
           <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 font-semibold">
             <Lock className="w-3.5 h-3.5 text-amber-700" />
-            <span>Ficha autorizada pela Direção: {classGroup} • {component}</span>
+            <span>Ficha autorizada pela Direção: {classGroup} / {component}</span>
           </div>
         )}
       </div>
@@ -389,6 +469,201 @@ export const ReportForm: React.FC<ReportFormProps> = ({
 
         {/* Dynamic Sections and Questions */}
         <div className="p-6 sm:p-8 space-y-8">
+          {/* SECTION: AVALIAÇÃO CONCEITUAL (RUIM, REGULAR, BOM, ÓTIMO) */}
+          <div className="bg-gradient-to-br from-amber-50/50 to-stone-50 rounded-2xl border-2 border-amber-300/80 p-5 sm:p-6 shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-amber-200">
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-amber-600" />
+                <h4 className="text-sm sm:text-base font-extrabold text-stone-900 tracking-wide uppercase font-serif">
+                  Avaliação Conceitual da Turma por Critérios Pedagógicos
+                </h4>
+              </div>
+              <span className="text-[11px] font-semibold text-amber-900 bg-amber-100/80 px-2.5 py-0.5 rounded-full border border-amber-300">
+                Critérios Oficiais
+              </span>
+            </div>
+
+            <p className="text-xs text-stone-600 mb-5 leading-relaxed">
+              Avalie o desempenho global da turma <strong>{classGroup}</strong> no componente <strong>{component}</strong> selecionando o conceito correspondente em cada critério abaixo:
+            </p>
+
+            {/* Dimension Ratings Grid */}
+            <div className="space-y-4 mb-6">
+              {EVALUATION_DIMENSIONS.map((dim) => {
+                const currentRating = dimensionRatings[dim.id];
+                return (
+                  <div
+                    key={dim.id}
+                    className="bg-white rounded-xl border border-stone-200 p-3.5 sm:p-4 hover:border-amber-300 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs"
+                  >
+                    <div className="sm:w-1/2">
+                      <p className="text-xs sm:text-sm font-bold text-stone-900">
+                        {dim.name}
+                      </p>
+                      <p className="text-[11px] text-stone-500 mt-0.5">
+                        {dim.description}
+                      </p>
+                    </div>
+
+                    {/* Radio-like buttons for Ruim, Regular, Bom, Otimo */}
+                    <div className="grid grid-cols-4 gap-1.5 sm:w-auto shrink-0">
+                      {(['ruim', 'regular', 'bom', 'otimo'] as ConceptRating[]).map((r) => {
+                        const isSelected = currentRating === r;
+                        const label =
+                          r === 'otimo'
+                            ? 'Ótimo'
+                            : r === 'bom'
+                            ? 'Bom'
+                            : r === 'regular'
+                            ? 'Regular'
+                            : 'Ruim';
+
+                        const colorClasses =
+                          r === 'otimo'
+                            ? isSelected
+                              ? 'bg-emerald-600 text-white border-emerald-700 font-extrabold shadow-xs'
+                              : 'bg-emerald-50/70 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
+                            : r === 'bom'
+                            ? isSelected
+                              ? 'bg-blue-600 text-white border-blue-700 font-extrabold shadow-xs'
+                              : 'bg-blue-50/70 text-blue-800 border-blue-200 hover:bg-blue-100'
+                            : r === 'regular'
+                            ? isSelected
+                              ? 'bg-amber-600 text-white border-amber-700 font-extrabold shadow-xs'
+                              : 'bg-amber-50/70 text-amber-800 border-amber-200 hover:bg-amber-100'
+                            : isSelected
+                            ? 'bg-rose-600 text-white border-rose-700 font-extrabold shadow-xs'
+                            : 'bg-rose-50/70 text-rose-800 border-rose-200 hover:bg-rose-100';
+
+                        return (
+                          <button
+                            key={r}
+                            type="button"
+                            onClick={() => handleDimensionRatingChange(dim.id, r)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all text-center ${colorClasses}`}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Student Individual Evaluations */}
+            {currentClassStudents.length > 0 && (
+              <div className="mt-6 pt-5 border-t border-amber-200">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                  <div>
+                    <h5 className="text-xs font-bold uppercase tracking-wider text-stone-900 flex items-center gap-1.5">
+                      <Users className="w-4 h-4 text-amber-700" />
+                      <span>Avaliação Conceitual Individual dos Alunos da Turma</span>
+                    </h5>
+                    <p className="text-[11px] text-stone-500">
+                      Atribua o conceito individual de cada estudante da turma nesta disciplina:
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleMarkAllStudentsBom}
+                    className="text-[11px] font-bold text-amber-900 bg-amber-100 hover:bg-amber-200 border border-amber-300 px-3 py-1.5 rounded-lg transition-colors self-start sm:self-auto shadow-2xs"
+                  >
+                    Marcar todos com conceito Bom
+                  </button>
+                </div>
+
+                <div className="bg-white rounded-xl border border-stone-200 overflow-hidden divide-y divide-stone-100">
+                  {currentClassStudents.map((std) => {
+                    const stRating = studentRatings[std.id]?.rating || 'bom';
+                    const stNotes = studentRatings[std.id]?.notes || '';
+
+                    return (
+                      <div
+                        key={std.id}
+                        className="p-3 hover:bg-stone-50/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                      >
+                        <div className="flex items-center gap-2 sm:w-1/3">
+                          <span className="w-5 text-[10px] font-mono font-bold text-stone-400">
+                            {std.rollNumber || '-'}
+                          </span>
+                          <div>
+                            <p className="text-xs font-bold text-stone-900 leading-tight">
+                              {std.name}
+                            </p>
+                            {std.status === 'atencao' && (
+                              <span className="text-[10px] font-semibold text-amber-800">
+                                Sinalizado para atenção
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Concept buttons for student */}
+                        <div className="flex items-center gap-1 shrink-0">
+                          {(['ruim', 'regular', 'bom', 'otimo'] as ConceptRating[]).map((r) => {
+                            const isSel = stRating === r;
+                            const label =
+                              r === 'otimo'
+                                ? 'Ótimo'
+                                : r === 'bom'
+                                ? 'Bom'
+                                : r === 'regular'
+                                ? 'Regular'
+                                : 'Ruim';
+
+                            const btnClass =
+                              r === 'otimo'
+                                ? isSel
+                                  ? 'bg-emerald-600 text-white font-bold'
+                                  : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
+                                : r === 'bom'
+                                ? isSel
+                                  ? 'bg-blue-600 text-white font-bold'
+                                  : 'bg-blue-50 text-blue-800 hover:bg-blue-100'
+                                : r === 'regular'
+                                ? isSel
+                                  ? 'bg-amber-600 text-white font-bold'
+                                  : 'bg-amber-50 text-amber-800 hover:bg-amber-100'
+                                : isSel
+                                ? 'bg-rose-600 text-white font-bold'
+                                : 'bg-rose-50 text-rose-800 hover:bg-rose-100';
+
+                            return (
+                              <button
+                                key={r}
+                                type="button"
+                                onClick={() => handleStudentRatingChange(std.id, r, stNotes)}
+                                className={`px-2.5 py-1 rounded text-[11px] border border-stone-200 transition-all ${btnClass}`}
+                              >
+                                {label}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* Short Note */}
+                        <div className="sm:w-1/3">
+                          <input
+                            type="text"
+                            placeholder="Obs individual (opcional)..."
+                            value={stNotes}
+                            onChange={(e) =>
+                              handleStudentRatingChange(std.id, stRating, e.target.value)
+                            }
+                            className="w-full bg-stone-50 border border-stone-300 rounded-lg px-2.5 py-1 text-[11px] text-stone-800 placeholder:text-stone-400 focus:bg-white focus:ring-1 focus:ring-amber-500"
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
           {sortedSections.map((sec) => {
             const sectionQuestions = questions
               .filter((q) => q.sectionId === sec.id)

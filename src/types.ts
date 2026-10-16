@@ -1,4 +1,5 @@
 export type UserRole = 'diretora' | 'professor';
+export type ConceptRating = 'otimo' | 'bom' | 'regular' | 'ruim';
 
 export interface User {
   id: string;
@@ -10,6 +11,30 @@ export interface User {
   subject?: string; // Componente curricular principal
   classes?: string[]; // Turmas atribuídas
   createdAt: string;
+}
+
+export interface SchoolClass {
+  id: string;
+  name: string; // ex: '6º Ano A'
+  shift?: 'Manhã' | 'Tarde' | 'Integral' | 'Noite';
+  year?: string;
+  description?: string;
+}
+
+export interface Student {
+  id: string;
+  name: string;
+  rollNumber?: string; // Número de chamada ou matrícula
+  classGroup: string; // Turma correspondente
+  status?: 'ativo' | 'transferido' | 'atencao';
+  notes?: string;
+  createdAt?: string;
+}
+
+export interface ClassDimension {
+  id: string;
+  name: string;
+  description: string;
 }
 
 export interface QuestionSection {
@@ -46,6 +71,9 @@ export interface PreCouncilReport {
   date: string; // Formato YYYY-MM-DD
   bimester: string; // 1º Bimestre, 2º Bimestre, etc.
   answers: Record<string, string>; // questionId -> response
+  // Formulário conceitual: Ruim, Regular, Bom, Ótimo
+  dimensionRatings?: Record<string, ConceptRating>; // dimensionId -> rating
+  studentRatings?: Record<string, { rating: ConceptRating; notes?: string }>; // studentId -> { rating, notes }
   status: 'pendente' | 'rascunho' | 'enviado' | 'visto';
   createdAt: string;
   updatedAt: string;

@@ -61,12 +61,13 @@ export const TeacherReportList: React.FC<TeacherReportListProps> = ({
             <h2 className="text-lg font-bold text-stone-900">
               Minhas Fichas de Pré-Conselho
             </h2>
-            <span className="text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full">
+            <span className="text-xs text-stone-500 font-medium hidden sm:inline" aria-hidden="true">/</span>
+            <span className="text-xs text-stone-600 font-medium">
               Docente: {currentUser.name}
             </span>
           </div>
           <p className="text-xs text-stone-500 mt-1">
-            As fichas oficiais são disponibilizadas diretamente pela <strong>Diretoria</strong> para cada turma e bimestre em que você leciona.
+            Fichas pedagógicas disponibilizadas pela Diretoria para cada turma e bimestre em que você leciona.
           </p>
         </div>
 

@@ -1,8 +1,84 @@
-import { QuestionSection, Question, User, PreCouncilReport } from '../types';
+import {
+  QuestionSection,
+  Question,
+  User,
+  PreCouncilReport,
+  SchoolClass,
+  Student,
+  ClassDimension,
+} from '../types';
 
 export const SCHOOL_NAME = 'ESCOLA ESTADUAL DO CAMPO FREI GRACIANO DROESSLER';
 export const SCHOOL_SUBTITLE = 'ENSINO FUNDAMENTAL EM TEMPO INTEGRAL';
-export const REPORT_TITLE = 'FICHA INDIVIDUAL – PRÉ-CONSELHO DE CLASSE';
+export const REPORT_TITLE = 'FICHA INDIVIDUAL DE PRÉ-CONSELHO DE CLASSE';
+
+export const EVALUATION_DIMENSIONS: ClassDimension[] = [
+  {
+    id: 'aprendizagem',
+    name: 'Desenvolvimento e Rendimento da Aprendizagem',
+    description: 'Compreensão dos conteúdos, consolidação das habilidades e ritmo de assimilação.',
+  },
+  {
+    id: 'participacao',
+    name: 'Participação, Envolvimento e Protagonismo',
+    description: 'Engajamento oral, interação em aulas e colaboração com a turma.',
+  },
+  {
+    id: 'disciplina',
+    name: 'Postura, Disciplina e Respeito',
+    description: 'Convivência em sala de aula, escuta atenta e respeito às regras escolares.',
+  },
+  {
+    id: 'tarefas',
+    name: 'Realização e Entrega de Tarefas/Trabalhos',
+    description: 'Compromisso com lições de casa, pontualidade e dedicação aos projetos.',
+  },
+  {
+    id: 'frequencia',
+    name: 'Frequência, Pontualidade e Assiduidade',
+    description: 'Presença regular nas aulas e pontualidade no início dos períodos.',
+  },
+  {
+    id: 'convivencia',
+    name: 'Convivência e Relacionamento Interpessoal',
+    description: 'Empatia, trabalho em equipe e mediação respeitosa de conflitos.',
+  },
+];
+
+export const INITIAL_CLASSES: SchoolClass[] = [
+  { id: 'cls-6a', name: '6º Ano A', shift: 'Integral', year: '2026', description: 'Ensino Fundamental II - Turma Matutino/Vespertino' },
+  { id: 'cls-6b', name: '6º Ano B', shift: 'Integral', year: '2026', description: 'Ensino Fundamental II' },
+  { id: 'cls-7a', name: '7º Ano A', shift: 'Integral', year: '2026', description: 'Ensino Fundamental II' },
+  { id: 'cls-7b', name: '7º Ano B', shift: 'Integral', year: '2026', description: 'Ensino Fundamental II' },
+  { id: 'cls-8a', name: '8º Ano A', shift: 'Integral', year: '2026', description: 'Ensino Fundamental II' },
+  { id: 'cls-8b', name: '8º Ano B', shift: 'Integral', year: '2026', description: 'Ensino Fundamental II' },
+  { id: 'cls-9a', name: '9º Ano A', shift: 'Integral', year: '2026', description: 'Ensino Fundamental II' },
+  { id: 'cls-9b', name: '9º Ano B', shift: 'Integral', year: '2026', description: 'Ensino Fundamental II' },
+  { id: 'cls-1em', name: '1º Ano EM', shift: 'Integral', year: '2026', description: 'Ensino Médio Integral' },
+  { id: 'cls-2em', name: '2º Ano EM', shift: 'Integral', year: '2026', description: 'Ensino Médio Integral' },
+  { id: 'cls-3em', name: '3º Ano EM', shift: 'Integral', year: '2026', description: 'Ensino Médio Integral' },
+];
+
+export const INITIAL_STUDENTS: Student[] = [
+  // 6º Ano A
+  { id: 'std-6a-01', name: 'Beatriz Silva Lima', rollNumber: '01', classGroup: '6º Ano A', status: 'ativo', notes: 'Destaque em participação e colaboração.' },
+  { id: 'std-6a-02', name: 'Carlos Miguel Albuquerque', rollNumber: '02', classGroup: '6º Ano A', status: 'ativo' },
+  { id: 'std-6a-03', name: 'Daniela Santos Ferreira', rollNumber: '03', classGroup: '6º Ano A', status: 'ativo' },
+  { id: 'std-6a-04', name: 'Eduardo Henrique Dias', rollNumber: '04', classGroup: '6º Ano A', status: 'ativo' },
+  { id: 'std-6a-05', name: 'Guilherme Henrique Ribeiro', rollNumber: '05', classGroup: '6º Ano A', status: 'atencao', notes: 'Necessita reforço contínuo em cálculo e leitura.' },
+  { id: 'std-6a-06', name: 'Júlia Cristina Pires', rollNumber: '06', classGroup: '6º Ano A', status: 'ativo' },
+  { id: 'std-6a-07', name: 'Larissa Manoela Martins', rollNumber: '07', classGroup: '6º Ano A', status: 'atencao', notes: 'Acompanhamento na sala de recursos.' },
+  { id: 'std-6a-08', name: 'Lucas Gabriel Duarte', rollNumber: '08', classGroup: '6º Ano A', status: 'ativo', notes: 'Líder de turma exemplar.' },
+  { id: 'std-6a-09', name: 'Marcos Vinicius Souza', rollNumber: '09', classGroup: '6º Ano A', status: 'atencao', notes: 'Faltas recorrentes às terças-feiras.' },
+  { id: 'std-6a-10', name: 'Rafaela Antunes Vieira', rollNumber: '10', classGroup: '6º Ano A', status: 'ativo' },
+  // 7º Ano B
+  { id: 'std-7b-01', name: 'Ana Clara Mendes', rollNumber: '01', classGroup: '7º Ano B', status: 'ativo' },
+  { id: 'std-7b-02', name: 'Felipe Martins Prado', rollNumber: '02', classGroup: '7º Ano B', status: 'atencao', notes: 'Bloqueio na escrita argumentativa.' },
+  { id: 'std-7b-03', name: 'Gabriel Alves Barreto', rollNumber: '03', classGroup: '7º Ano B', status: 'atencao', notes: 'Frequência oscilante.' },
+  { id: 'std-7b-04', name: 'Isabela Fontes Rocha', rollNumber: '04', classGroup: '7º Ano B', status: 'ativo', notes: 'Destaque no sarau cultural.' },
+  { id: 'std-7b-05', name: 'Kauã Barbosa Nogueira', rollNumber: '05', classGroup: '7º Ano B', status: 'ativo', notes: 'Excelente participação oral.' },
+  { id: 'std-7b-06', name: 'Matheus Lima Carvalho', rollNumber: '06', classGroup: '7º Ano B', status: 'ativo' },
+];
 
 export const INITIAL_SECTIONS: QuestionSection[] = [
   { id: 'sec-1', title: '1. PANORAMA DA TURMA', order: 1 },
@@ -106,6 +182,7 @@ export const INITIAL_USERS: User[] = [
     id: 'prof-carlos',
     name: 'Carlos Eduardo Souza',
     email: 'carlos.matematica@escola.gov.br',
+    username: 'Carlos Eduardo Souza',
     password: '123',
     role: 'professor',
     subject: 'Matemática',
@@ -116,6 +193,7 @@ export const INITIAL_USERS: User[] = [
     id: 'prof-ana',
     name: 'Ana Paula Oliveira',
     email: 'ana.portugues@escola.gov.br',
+    username: 'Ana Paula Oliveira',
     password: '123',
     role: 'professor',
     subject: 'Língua Portuguesa',
@@ -126,6 +204,7 @@ export const INITIAL_USERS: User[] = [
     id: 'prof-roberto',
     name: 'Roberto Silva Lima',
     email: 'roberto.ciencias@escola.gov.br',
+    username: 'Roberto Silva Lima',
     password: '123',
     role: 'professor',
     subject: 'Ciências da Natureza',
@@ -187,6 +266,26 @@ export const INITIAL_REPORTS: PreCouncilReport[] = [
       'q-7': 'Foram aplicados jogos didáticos e listas de revisão contextualizadas. Sugiro oficinas de reforço com a equipe pedagógica.',
       'q-8': 'Reunião prévia com a professora de Língua Portuguesa para integrar atividades interdisciplinares.',
       'q-9': 'A turma do 6º Ano A tem excelente entrosamento e responde prontamente a incentivos metodológicos diversificados.',
+    },
+    dimensionRatings: {
+      aprendizagem: 'bom',
+      participacao: 'otimo',
+      disciplina: 'bom',
+      tarefas: 'bom',
+      frequencia: 'regular',
+      convivencia: 'otimo',
+    },
+    studentRatings: {
+      'std-6a-01': { rating: 'otimo', notes: 'Participação brilhante' },
+      'std-6a-02': { rating: 'bom' },
+      'std-6a-03': { rating: 'bom' },
+      'std-6a-04': { rating: 'bom' },
+      'std-6a-05': { rating: 'regular', notes: 'Dificuldade em frações' },
+      'std-6a-06': { rating: 'bom' },
+      'std-6a-07': { rating: 'regular', notes: 'Apoio pedagógico' },
+      'std-6a-08': { rating: 'otimo', notes: 'Líder participativo' },
+      'std-6a-09': { rating: 'ruim', notes: 'Faltas e tarefas pendentes' },
+      'std-6a-10': { rating: 'bom' },
     },
     pedagogaSignature: {
       signed: true,

@@ -1,0 +1,131 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Usuário do sistema escolar (Diretor ou Professor)",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "ID do usuário" },
+        "name": { "type": "string", "description": "Nome completo" },
+        "email": { "type": "string", "description": "Email institucional" },
+        "username": { "type": "string", "description": "Nome de usuário de acesso" },
+        "password": { "type": "string", "description": "Senha de acesso" },
+        "role": { "type": "string", "enum": ["diretora", "professor"], "description": "Papel no sistema" },
+        "subject": { "type": "string", "description": "Disciplina ou componente lecionado" },
+        "classes": { "type": "array", "description": "Turmas atribuídas" },
+        "active": { "type": "boolean", "description": "Se usuário está ativo" }
+      },
+      "required": ["id", "name", "email", "role"]
+    },
+    "QuestionSection": {
+      "title": "QuestionSection",
+      "description": "Seção do questionário de conselho de classe",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "ID da seção" },
+        "title": { "type": "string", "description": "Título da seção" },
+        "description": { "type": "string", "description": "Descrição da seção" },
+        "order": { "type": "number", "description": "Ordem de exibição" }
+      },
+      "required": ["id", "title", "order"]
+    },
+    "Question": {
+      "title": "Question",
+      "description": "Pergunta da ficha de pré-conselho",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "ID da questão" },
+        "code": { "type": "string", "description": "Código da questão" },
+        "title": { "type": "string", "description": "Enunciado da pergunta" },
+        "description": { "type": "string", "description": "Instrução adicional" },
+        "category": { "type": "string", "description": "Categoria pedagógica" },
+        "sectionId": { "type": "string", "description": "ID da seção à qual pertence" },
+        "order": { "type": "number", "description": "Ordem dentro da seção" },
+        "required": { "type": "boolean", "description": "Se resposta é obrigatória" },
+        "options": { "type": "array", "description": "Opções de resposta rápida se houver" }
+      },
+      "required": ["id", "code", "title", "sectionId", "order"]
+    },
+    "PreCouncilReport": {
+      "title": "PreCouncilReport",
+      "description": "Ficha e relatório de pré-conselho preenchida pelo professor para uma turma e bimestre",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "ID único da ficha" },
+        "schoolName": { "type": "string", "description": "Nome da escola" },
+        "schoolSubtitle": { "type": "string", "description": "Subtítulo da instituição" },
+        "title": { "type": "string", "description": "Título oficial do relatório" },
+        "teacherId": { "type": "string", "description": "ID do professor autor" },
+        "teacherName": { "type": "string", "description": "Nome do professor" },
+        "component": { "type": "string", "description": "Disciplina/Componente Curricular" },
+        "classGroup": { "type": "string", "description": "Turma avaliada" },
+        "date": { "type": "string", "description": "Data de preenchimento ou envio" },
+        "bimester": { "type": "string", "description": "Bimestre de referência" },
+        "answers": { "type": "object", "description": "Respostas textuais por ID da questão" },
+        "status": { "type": "string", "enum": ["pendente", "em_andamento", "enviado", "concluido"], "description": "Status do preenchimento" },
+        "dimensionRatings": { "type": "object", "description": "Avaliação pedagógica conceitual (ruim, regular, bom, ótimo)" },
+        "studentRatings": { "type": "object", "description": "Avaliação individual por aluno com conceito e anotação" },
+        "feedback": { "type": "string", "description": "Parecer ou devolutiva da direção" },
+        "submittedAt": { "type": "string", "description": "Data/hora do envio final à direção" }
+      },
+      "required": ["id", "teacherId", "teacherName", "component", "classGroup", "bimester", "status"]
+    },
+    "SchoolClass": {
+      "title": "SchoolClass",
+      "description": "Turma escolar cadastrada pela direção",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "ID da turma" },
+        "name": { "type": "string", "description": "Nome da turma (Ex: 6º Ano A)" },
+        "gradeYear": { "type": "string", "description": "Série ou ano escolar" },
+        "shift": { "type": "string", "description": "Turno de aula" },
+        "studentCount": { "type": "number", "description": "Quantidade de alunos matriculados" },
+        "academicYear": { "type": "string", "description": "Ano letivo" },
+        "description": { "type": "string", "description": "Observações sobre a turma" },
+        "active": { "type": "boolean", "description": "Turma ativa" }
+      },
+      "required": ["id", "name", "shift", "academicYear"]
+    },
+    "Student": {
+      "title": "Student",
+      "description": "Estudante cadastrado ou importado via planilha Excel",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "ID do estudante" },
+        "name": { "type": "string", "description": "Nome do aluno" },
+        "rollNumber": { "type": "string", "description": "Número de chamada" },
+        "classGroup": { "type": "string", "description": "Turma do estudante" },
+        "status": { "type": "string", "description": "Situação do aluno (ativo, destaque, etc.)" },
+        "notes": { "type": "string", "description": "Anotações pedagógicas da direção ou coordenação" },
+        "active": { "type": "boolean", "description": "Aluno ativo" }
+      },
+      "required": ["id", "name", "classGroup"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Coleção de diretores e professores"
+    },
+    "/sections/{sectionId}": {
+      "schema": { "$ref": "#/entities/QuestionSection" },
+      "description": "Seções do questionário de avaliação"
+    },
+    "/questions/{questionId}": {
+      "schema": { "$ref": "#/entities/Question" },
+      "description": "Perguntas das fichas de pré-conselho gerenciadas pelo diretor"
+    },
+    "/reports/{reportId}": {
+      "schema": { "$ref": "#/entities/PreCouncilReport" },
+      "description": "Fichas liberadas pelo diretor e respondidas pelos professores com sincronização em tempo real"
+    },
+    "/classes/{classId}": {
+      "schema": { "$ref": "#/entities/SchoolClass" },
+      "description": "Turmas escolares cadastradas pela direção"
+    },
+    "/students/{studentId}": {
+      "schema": { "$ref": "#/entities/Student" },
+      "description": "Alunos cadastrados ou importados via Excel"
+    }
+  }
+}

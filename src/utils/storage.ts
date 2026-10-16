@@ -1,9 +1,18 @@
-import { User, Question, QuestionSection, PreCouncilReport } from '../types';
+import {
+  User,
+  Question,
+  QuestionSection,
+  PreCouncilReport,
+  SchoolClass,
+  Student,
+} from '../types';
 import {
   INITIAL_USERS,
   INITIAL_QUESTIONS,
   INITIAL_SECTIONS,
   INITIAL_REPORTS,
+  INITIAL_CLASSES,
+  INITIAL_STUDENTS,
 } from '../data/initialData';
 
 const USERS_KEY = 'pre_conselho_users';
@@ -11,6 +20,8 @@ const QUESTIONS_KEY = 'pre_conselho_questions';
 const SECTIONS_KEY = 'pre_conselho_sections';
 const REPORTS_KEY = 'pre_conselho_reports';
 const CURRENT_USER_KEY = 'pre_conselho_current_user';
+const CLASSES_KEY = 'pre_conselho_classes';
+const STUDENTS_KEY = 'pre_conselho_students';
 
 export function getStoredUsers(): User[] {
   try {
@@ -110,6 +121,42 @@ export function saveStoredReports(reports: PreCouncilReport[]) {
   localStorage.setItem(REPORTS_KEY, JSON.stringify(reports));
 }
 
+export function getStoredClasses(): SchoolClass[] {
+  try {
+    const raw = localStorage.getItem(CLASSES_KEY);
+    if (!raw) {
+      localStorage.setItem(CLASSES_KEY, JSON.stringify(INITIAL_CLASSES));
+      return INITIAL_CLASSES;
+    }
+    return JSON.parse(raw);
+  } catch (e) {
+    console.error('Failed to parse stored classes', e);
+    return INITIAL_CLASSES;
+  }
+}
+
+export function saveStoredClasses(classes: SchoolClass[]) {
+  localStorage.setItem(CLASSES_KEY, JSON.stringify(classes));
+}
+
+export function getStoredStudents(): Student[] {
+  try {
+    const raw = localStorage.getItem(STUDENTS_KEY);
+    if (!raw) {
+      localStorage.setItem(STUDENTS_KEY, JSON.stringify(INITIAL_STUDENTS));
+      return INITIAL_STUDENTS;
+    }
+    return JSON.parse(raw);
+  } catch (e) {
+    console.error('Failed to parse stored students', e);
+    return INITIAL_STUDENTS;
+  }
+}
+
+export function saveStoredStudents(students: Student[]) {
+  localStorage.setItem(STUDENTS_KEY, JSON.stringify(students));
+}
+
 export function getCurrentUser(): User | null {
   try {
     const raw = localStorage.getItem(CURRENT_USER_KEY);
@@ -136,5 +183,7 @@ export function resetToFactoryData() {
   localStorage.setItem(QUESTIONS_KEY, JSON.stringify(INITIAL_QUESTIONS));
   localStorage.setItem(SECTIONS_KEY, JSON.stringify(INITIAL_SECTIONS));
   localStorage.setItem(REPORTS_KEY, JSON.stringify(INITIAL_REPORTS));
+  localStorage.setItem(CLASSES_KEY, JSON.stringify(INITIAL_CLASSES));
+  localStorage.setItem(STUDENTS_KEY, JSON.stringify(INITIAL_STUDENTS));
   localStorage.removeItem(CURRENT_USER_KEY);
 }

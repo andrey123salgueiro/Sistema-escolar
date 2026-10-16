@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { PreCouncilReport, Question, QuestionSection, User } from '../types';
+import { PreCouncilReport, Question, QuestionSection, User, ConceptRating } from '../types';
+import { EVALUATION_DIMENSIONS } from '../data/initialData';
 import {
   Printer,
   X,
@@ -100,9 +101,9 @@ export const ReportViewModal: React.FC<ReportViewModalProps> = ({
             <span className="font-semibold text-amber-400">
               Visualização Oficial do Documento
             </span>
-            <span className="text-stone-500">•</span>
+            <span className="text-stone-500" aria-hidden="true">/</span>
             <span className="text-stone-300">
-              {report.classGroup} - {report.component} ({report.bimester})
+              {report.classGroup} / {report.component} ({report.bimester})
             </span>
           </div>
 
@@ -214,6 +215,58 @@ export const ReportViewModal: React.FC<ReportViewModalProps> = ({
 
           {/* Sections & Answers Content */}
           <div className="space-y-6">
+            {/* Avaliação Conceitual Pedagógica (Ruim, Regular, Bom, Ótimo) */}
+            {report.dimensionRatings && Object.keys(report.dimensionRatings).length > 0 && (
+              <div className="border border-stone-300 rounded-xl p-5 bg-stone-50/40 page-break-inside-avoid shadow-xs">
+                <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-stone-900 border-b border-stone-200 pb-2 mb-3 font-serif flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-600 print:bg-black" />
+                    Avaliação Conceitual da Turma por Critérios Pedagógicos
+                  </span>
+                  <span className="text-[10px] font-sans font-normal text-stone-500 uppercase tracking-normal">
+                    Critérios Oficiais
+                  </span>
+                </h3>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                  {EVALUATION_DIMENSIONS.map((dim) => {
+                    const rating = report.dimensionRatings?.[dim.id];
+                    if (!rating) return null;
+                    const label =
+                      rating === 'otimo'
+                        ? 'Ótimo'
+                        : rating === 'bom'
+                        ? 'Bom'
+                        : rating === 'regular'
+                        ? 'Regular'
+                        : 'Ruim';
+
+                    return (
+                      <div
+                        key={dim.id}
+                        className="bg-white border border-stone-200 rounded-lg p-2.5 flex items-center justify-between"
+                      >
+                        <span className="font-semibold text-stone-800 pr-2">{dim.name}:</span>
+                        <span
+                          className={`font-bold px-2.5 py-0.5 rounded text-[11px] uppercase border ${
+                            rating === 'otimo'
+                              ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                              : rating === 'bom'
+                              ? 'bg-blue-50 text-blue-800 border-blue-300'
+                              : rating === 'regular'
+                              ? 'bg-amber-50 text-amber-800 border-amber-300'
+                              : 'bg-rose-50 text-rose-800 border-rose-300'
+                          }`}
+                        >
+                          {label}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {sortedSections.map((sec) => {
               const secQuestions = questions
                 .filter((q) => q.sectionId === sec.id)
@@ -332,7 +385,7 @@ export const ReportViewModal: React.FC<ReportViewModalProps> = ({
                 </p>
                 {report.pedagogaSignature?.signed ? (
                   <p className="text-[10px] text-emerald-700 font-semibold mt-0.5">
-                    ✓ Visto Validado
+                    Visto Validado
                   </p>
                 ) : (
                   <p className="text-[10px] text-stone-400 mt-0.5">Pendente de visto</p>
@@ -351,7 +404,7 @@ export const ReportViewModal: React.FC<ReportViewModalProps> = ({
                 </p>
                 {report.diretoraSignature?.signed ? (
                   <p className="text-[10px] text-emerald-700 font-semibold mt-0.5">
-                    ✓ Visto Homologado
+                    Visto Homologado
                   </p>
                 ) : (
                   <p className="text-[10px] text-stone-400 mt-0.5">Pendente de visto</p>

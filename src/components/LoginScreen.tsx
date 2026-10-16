@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import { User } from '../types';
+import { Logo } from './Logo';
 import {
-  School,
   Lock,
-  Mail,
   Eye,
   EyeOff,
   AlertCircle,
   LogIn,
-  KeyRound,
   GraduationCap,
   ShieldCheck,
   User as UserIcon,
@@ -19,6 +17,14 @@ import { SCHOOL_NAME, SCHOOL_SUBTITLE } from '../data/initialData';
 interface LoginScreenProps {
   users: User[];
   onLoginSuccess: (user: User) => void;
+}
+
+function normalize(str: string): string {
+  return str
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
 }
 
 export const LoginScreen: React.FC<LoginScreenProps> = ({
@@ -49,39 +55,63 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
     e.preventDefault();
     setErrorMessage(null);
 
-    const cleanInput = teacherInput.trim().toLowerCase();
+    const rawInput = teacherInput.trim();
     const cleanPass = teacherPassword.trim();
 
-    if (!cleanInput) {
-      setErrorMessage('Por favor, informe seu e-mail institucional ou selecione seu nome.');
+    if (!rawInput) {
+      setErrorMessage('Por favor, informe o seu nome de professor cadastrado.');
       return;
     }
 
-    if (cleanInput === 'admin' || cleanInput === 'diretoria@escola.gov.br') {
+    if (!cleanPass) {
+      setErrorMessage('Por favor, digite a sua senha de acesso (padrão: 123).');
+      return;
+    }
+
+    const normInput = normalize(rawInput);
+
+    if (normInput === 'admin' || normInput === 'diretoria@escola.gov.br') {
       setErrorMessage(
-        'Este usuário pertence à Direção da escola. Por favor, acesse através da aba "Acesso da Diretoria".'
+        'Este usuário pertence à Direção. Por favor, acesse através da aba Acesso da Diretoria.'
       );
       return;
     }
 
-    // Find in teachers list
-    const foundTeacher = teacherUsers.find(
-      (t) =>
-        t.email.toLowerCase() === cleanInput ||
-        t.name.toLowerCase() === cleanInput ||
-        (t.username && t.username.toLowerCase() === cleanInput)
-    );
+    // Search by full name, username or email (case & accent insensitive)
+    let foundTeacher = teacherUsers.find((t) => {
+      const normName = normalize(t.name);
+      const normUsername = normalize(t.username || t.name);
+      const normEmail = normalize(t.email);
+      return (
+        normName === normInput ||
+        normUsername === normInput ||
+        normEmail === normInput
+      );
+    });
+
+    // If not found by exact match, try partial match
+    if (!foundTeacher) {
+      const candidates = teacherUsers.filter((t) => {
+        const normName = normalize(t.name);
+        return normName.includes(normInput) || normInput.includes(normName);
+      });
+
+      if (candidates.length === 1) {
+        foundTeacher = candidates[0];
+      }
+    }
 
     if (!foundTeacher) {
       setErrorMessage(
-        'Professor(a) não encontrado(a). Verifique o e-mail ou selecione seu nome na lista.'
+        `Professor(a) "${rawInput}" não encontrado(a). Verifique a grafia ou consulte a Direção.`
       );
       return;
     }
 
+    // All teachers have password 123
     const expectedPass = foundTeacher.password || '123';
-    if (cleanPass !== expectedPass && cleanPass !== '123') {
-      setErrorMessage('Senha incorreta para este professor. A senha padrão do sistema é 123.');
+    if (cleanPass !== '123' && cleanPass !== expectedPass) {
+      setErrorMessage('Senha incorreta. A senha padrão de todos os professores é 123.');
       return;
     }
 
@@ -101,16 +131,18 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
       return;
     }
 
-    // Check if a teacher tried to login on director tab
+    if (!cleanPass) {
+      setErrorMessage('Por favor, digite a senha da Diretora (padrão: 123).');
+      return;
+    }
+
     const isTeacher = teacherUsers.some(
-      (t) =>
-        t.email.toLowerCase() === cleanInput ||
-        t.name.toLowerCase() === cleanInput
+      (t) => normalize(t.name) === normalize(cleanInput)
     );
 
     if (isTeacher) {
       setErrorMessage(
-        'Este usuário pertence a um professor. Por favor, utilize a aba "Acesso do Professor".'
+        'Este usuário pertence a um professor. Por favor, utilize a aba Acesso do Professor.'
       );
       return;
     }
@@ -120,17 +152,17 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
       cleanInput !== 'diretoria@escola.gov.br' &&
       diretoraUser &&
       diretoraUser.email.toLowerCase() !== cleanInput &&
-      diretoraUser.name.toLowerCase() !== cleanInput
+      normalize(diretoraUser.name) !== normalize(cleanInput)
     ) {
       setErrorMessage(
-        'Usuário da Diretoria inválido. O login oficial da Diretora é "admin".'
+        'Usuário da Diretoria inválido. O usuário oficial da Diretora é "admin".'
       );
       return;
     }
 
     const expectedPass = diretoraUser?.password || '123';
     if (cleanPass !== expectedPass && cleanPass !== '123') {
-      setErrorMessage('Senha incorreta para a Diretora. A senha padrão do sistema é 123.');
+      setErrorMessage('Senha incorreta para a Diretora. A senha padrão é 123.');
       return;
     }
 
@@ -139,50 +171,33 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
     }
   };
 
-  // Quick helper to fill teacher
-  const handleSelectTeacher = (teacher: User) => {
-    setTeacherInput(teacher.email);
-    setTeacherPassword('123');
-    setErrorMessage(null);
-  };
-
-  // Quick helper to fill director
-  const handleFillDiretoraDemo = () => {
-    setDiretoraInput('admin');
-    setDiretoraPassword('123');
-    setErrorMessage(null);
-  };
-
   return (
-    <div className="min-h-screen bg-stone-100 flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        {/* School Crest / Header */}
-        <div className="text-center">
-          <div className="mx-auto w-14 h-14 rounded-2xl bg-amber-700 text-white flex items-center justify-center shadow-md mb-3">
-            <School className="w-8 h-8 text-amber-100" />
+    <div className="min-h-screen bg-slate-900 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Subtle geometric institutional backdrop */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-amber-400 blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-blue-600 blur-3xl" />
+      </div>
+
+      <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
+        {/* Institutional Branding Block */}
+        <div className="text-center mb-8">
+          <div className="flex justify-center mb-3">
+            <Logo size="lg" variant="light" showSubtitle={false} />
           </div>
 
-          <h2 className="text-sm sm:text-base font-extrabold uppercase tracking-wide text-stone-900 font-serif">
+          <p className="text-xs font-bold tracking-wider text-amber-400 uppercase font-sans mt-3">
             {SCHOOL_NAME}
-          </h2>
-          <p className="text-xs font-semibold text-stone-600 uppercase tracking-wider mt-0.5">
-            {SCHOOL_SUBTITLE}
           </p>
-
-          <div className="my-2 mx-auto w-16 h-0.5 bg-amber-600/40 rounded-full" />
-
-          <h3 className="text-base font-bold text-stone-800">
-            Acesso ao Pré-Conselho de Classe
-          </h3>
-          <p className="text-xs text-stone-500 mt-0.5">
-            Selecione seu perfil de acesso abaixo para entrar
+          <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wide mt-0.5">
+            {SCHOOL_SUBTITLE}
           </p>
         </div>
 
-        {/* Card Form */}
-        <div className="mt-6 bg-white shadow-sm border border-stone-200 rounded-2xl overflow-hidden">
-          {/* Top Role Selector Tabs */}
-          <div className="grid grid-cols-2 p-1.5 bg-stone-100 border-b border-stone-200">
+        {/* Main Authentication Card */}
+        <div className="bg-white rounded-2xl shadow-xl border border-slate-200/80 overflow-hidden">
+          {/* Top Segmented Selector */}
+          <div className="grid grid-cols-2 p-1.5 bg-slate-100/90 border-b border-slate-200/80">
             <button
               type="button"
               id="tab-login-professor"
@@ -190,17 +205,13 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                 setActiveTab('professor');
                 setErrorMessage(null);
               }}
-              className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === 'professor'
-                  ? 'bg-white text-emerald-800 shadow-xs border border-stone-200/80'
-                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/50'
+                  ? 'bg-white text-slate-900 shadow-xs font-bold'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <GraduationCap
-                className={`w-4 h-4 ${
-                  activeTab === 'professor' ? 'text-emerald-700' : 'text-stone-500'
-                }`}
-              />
+              <GraduationCap className="w-4 h-4 text-slate-700" />
               <span>Acesso do Professor</span>
             </button>
 
@@ -211,26 +222,22 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                 setActiveTab('diretora');
                 setErrorMessage(null);
               }}
-              className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === 'diretora'
-                  ? 'bg-white text-purple-900 shadow-xs border border-stone-200/80'
-                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/50'
+                  ? 'bg-white text-slate-900 shadow-xs font-bold'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <ShieldCheck
-                className={`w-4 h-4 ${
-                  activeTab === 'diretora' ? 'text-purple-700' : 'text-stone-500'
-                }`}
-              />
+              <ShieldCheck className="w-4 h-4 text-slate-700" />
               <span>Acesso da Diretoria</span>
             </button>
           </div>
 
-          <div className="py-6 px-6 sm:px-8">
+          <div className="p-6 sm:p-8">
             {/* Error Message Box */}
             {errorMessage && (
-              <div className="mb-5 bg-red-50 border border-red-200 text-red-700 px-3.5 py-3 rounded-xl text-xs flex items-start gap-2.5">
-                <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+              <div className="mb-5 bg-rose-50 border border-rose-200 text-rose-800 px-3.5 py-3 rounded-xl text-xs flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                 <span>{errorMessage}</span>
               </div>
             )}
@@ -238,77 +245,68 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
             {/* TAB 1: PROFESSOR LOGIN */}
             {activeTab === 'professor' && (
               <div>
-                <div className="mb-4 pb-3 border-b border-stone-100 flex items-center justify-between">
+                <div className="mb-5 pb-3 border-b border-slate-100 flex items-center justify-between">
                   <div>
-                    <h4 className="text-xs font-bold text-stone-900 flex items-center gap-1.5">
-                      <GraduationCap className="w-4 h-4 text-emerald-700" />
-                      <span>Portal Docente</span>
-                    </h4>
-                    <p className="text-[11px] text-stone-500">
-                      Preenchimento das fichas oficiais autorizadas pela Direção
+                    <h3 className="text-sm font-bold text-slate-900">
+                      Portal do Docente
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Preenchimento das fichas pedagógicas
                     </p>
                   </div>
-                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
                     Senha: 123
                   </span>
                 </div>
 
                 <form onSubmit={handleTeacherSubmit} className="space-y-4">
-                  {/* Quick Teacher Selector Dropdown */}
+                  {/* Teacher Name Input (Username) */}
                   <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1">
-                      Selecione seu Nome ou Digite seu E-mail
+                    <label className="block text-xs font-medium text-slate-700 mb-1">
+                      Nome do Professor (Usuário)
                     </label>
-                    <select
-                      value={teacherInput}
-                      onChange={(e) => {
-                        setTeacherInput(e.target.value);
-                        if (!teacherPassword) setTeacherPassword('123');
-                        setErrorMessage(null);
-                      }}
-                      className="w-full px-3 py-2 bg-stone-50 border border-stone-300 rounded-xl text-xs text-stone-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 mb-2"
-                    >
-                      <option value="">-- Selecione seu nome na lista de professores --</option>
-                      {teacherUsers.map((teacher) => (
-                        <option key={teacher.id} value={teacher.email}>
-                          Prof. {teacher.name} ({teacher.subject || 'Docente'})
-                        </option>
-                      ))}
-                    </select>
-
                     <div className="relative">
-                      <Mail className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <UserIcon className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                       <input
                         type="text"
-                        id="input-teacher-email"
-                        placeholder="Ou digite seu e-mail institucional"
+                        required
+                        id="input-teacher-name"
+                        placeholder="Digite seu nome (ex: Carlos Eduardo Souza)"
                         value={teacherInput}
                         onChange={(e) => setTeacherInput(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2 bg-stone-50 border border-stone-300 rounded-xl text-xs text-stone-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition-all"
+                        className="w-full pl-9 pr-3 py-2.5 bg-slate-50/50 border border-slate-300 rounded-xl text-xs text-slate-900 focus:bg-white focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-all font-medium"
                       />
                     </div>
+                    <p className="text-[11px] text-slate-500 mt-1">
+                      Seu usuário de acesso é o seu nome completo cadastrado pela Direção.
+                    </p>
                   </div>
 
                   {/* Password */}
                   <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1">
-                      Senha de Acesso
-                    </label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-xs font-medium text-slate-700">
+                        Senha de Acesso
+                      </label>
+                      <span className="text-[10px] text-slate-400">
+                        Padrão: 123
+                      </span>
+                    </div>
                     <div className="relative">
-                      <Lock className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                       <input
                         type={showTeacherPassword ? 'text' : 'password'}
                         required
                         id="input-teacher-password"
-                        placeholder="Senha (padrão: 123)"
+                        placeholder="Senha (123)"
                         value={teacherPassword}
                         onChange={(e) => setTeacherPassword(e.target.value)}
-                        className="w-full pl-9 pr-10 py-2.5 bg-stone-50 border border-stone-300 rounded-xl text-xs text-stone-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition-all"
+                        className="w-full pl-9 pr-10 py-2.5 bg-slate-50/50 border border-slate-300 rounded-xl text-xs text-slate-900 focus:bg-white focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-all font-mono"
                       />
                       <button
                         type="button"
                         onClick={() => setShowTeacherPassword(!showTeacherPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                         title={showTeacherPassword ? 'Ocultar senha' : 'Ver senha'}
                       >
                         {showTeacherPassword ? (
@@ -325,82 +323,51 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                     <button
                       type="submit"
                       id="btn-login-teacher"
-                      className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white text-xs font-bold rounded-xl shadow-xs transition-colors"
+                      className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-xs font-bold rounded-xl shadow-xs transition-colors"
                     >
                       <LogIn className="w-4 h-4" />
-                      <span>Entrar como Professor</span>
+                      <span>Entrar no Sistema</span>
                     </button>
                   </div>
                 </form>
-
-                {/* Quick teacher buttons */}
-                <div className="mt-5 pt-4 border-t border-stone-100">
-                  <p className="text-[11px] font-bold text-stone-500 uppercase tracking-wider mb-2 flex items-center gap-1">
-                    <KeyRound className="w-3 h-3 text-emerald-700" />
-                    <span>Acesso Rápido de Teste (Senha: 123):</span>
-                  </p>
-                  <div className="grid grid-cols-1 gap-1.5">
-                    {teacherUsers.map((teacher) => (
-                      <button
-                        key={teacher.id}
-                        type="button"
-                        onClick={() => handleSelectTeacher(teacher)}
-                        className="text-left px-3 py-2 rounded-xl border border-stone-200 bg-stone-50 hover:bg-emerald-50 hover:border-emerald-300 transition-colors flex items-center justify-between group"
-                      >
-                        <div>
-                          <p className="text-xs font-bold text-stone-800 group-hover:text-emerald-900 leading-tight">
-                            Prof. {teacher.name}
-                          </p>
-                          <p className="text-[10px] text-stone-500 group-hover:text-emerald-700">
-                            {teacher.subject} • {teacher.email}
-                          </p>
-                        </div>
-                        <span className="text-[10px] font-bold text-stone-500 group-hover:text-emerald-800 bg-stone-200/60 group-hover:bg-emerald-200/80 px-2 py-0.5 rounded-md transition-colors">
-                          Selecionar
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
               </div>
             )}
 
             {/* TAB 2: DIRETORA LOGIN */}
             {activeTab === 'diretora' && (
               <div>
-                <div className="mb-4 pb-3 border-b border-stone-100 flex items-center justify-between">
+                <div className="mb-5 pb-3 border-b border-slate-100 flex items-center justify-between">
                   <div>
-                    <h4 className="text-xs font-bold text-stone-900 flex items-center gap-1.5">
-                      <ShieldCheck className="w-4 h-4 text-purple-700" />
-                      <span>Painel da Direção Escolar</span>
-                    </h4>
-                    <p className="text-[11px] text-stone-500">
-                      Liberação de fichas, homologação e arquivo geral
+                    <h3 className="text-sm font-bold text-slate-900">
+                      Painel da Direção Escolar
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Liberação de fichas e homologação
                     </p>
                   </div>
-                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-purple-50 text-purple-800 border border-purple-200">
-                    Restrito
+                  <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                    Acesso Restrito
                   </span>
                 </div>
 
-                <div className="mb-4 bg-purple-50/80 border border-purple-200 rounded-xl p-3 text-purple-950 text-xs">
-                  <div className="flex items-center gap-2 font-bold mb-0.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-purple-700 shrink-0" />
-                    <span>Credenciais Oficiais da Diretoria:</span>
+                <div className="mb-4 bg-slate-50 border border-slate-200 rounded-xl p-3 text-slate-700 text-xs">
+                  <div className="flex items-center gap-2 font-medium mb-1">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-slate-800 shrink-0" />
+                    <span>Credenciais da Direção:</span>
                   </div>
-                  <p className="text-[11px] text-purple-800 ml-5">
-                    Usuário: <span className="font-mono font-bold bg-white px-1.5 py-0.5 rounded border border-purple-200">admin</span> • Senha: <span className="font-mono font-bold bg-white px-1.5 py-0.5 rounded border border-purple-200">123</span>
+                  <p className="text-[11px] text-slate-600 ml-5 font-mono">
+                    Usuário: <strong>admin</strong> | Senha: <strong>123</strong>
                   </p>
                 </div>
 
                 <form onSubmit={handleDiretoraSubmit} className="space-y-4">
                   {/* Director Username */}
                   <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1">
+                    <label className="block text-xs font-medium text-slate-700 mb-1">
                       Usuário da Diretora
                     </label>
                     <div className="relative">
-                      <UserIcon className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <UserIcon className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                       <input
                         type="text"
                         required
@@ -408,31 +375,31 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                         placeholder="admin"
                         value={diretoraInput}
                         onChange={(e) => setDiretoraInput(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2.5 bg-stone-50 border border-stone-300 rounded-xl text-xs text-stone-900 focus:bg-white focus:ring-2 focus:ring-purple-500 transition-all font-medium"
+                        className="w-full pl-9 pr-3 py-2.5 bg-slate-50/50 border border-slate-300 rounded-xl text-xs text-slate-900 focus:bg-white focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-all font-mono font-medium"
                       />
                     </div>
                   </div>
 
                   {/* Password */}
                   <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1">
+                    <label className="block text-xs font-medium text-slate-700 mb-1">
                       Senha de Acesso
                     </label>
                     <div className="relative">
-                      <Lock className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                       <input
                         type={showDiretoraPassword ? 'text' : 'password'}
                         required
                         id="input-diretora-password"
-                        placeholder="Senha (padrão: 123)"
+                        placeholder="123"
                         value={diretoraPassword}
                         onChange={(e) => setDiretoraPassword(e.target.value)}
-                        className="w-full pl-9 pr-10 py-2.5 bg-stone-50 border border-stone-300 rounded-xl text-xs text-stone-900 focus:bg-white focus:ring-2 focus:ring-purple-500 transition-all"
+                        className="w-full pl-9 pr-10 py-2.5 bg-slate-50/50 border border-slate-300 rounded-xl text-xs text-slate-900 focus:bg-white focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-all font-mono"
                       />
                       <button
                         type="button"
                         onClick={() => setShowDiretoraPassword(!showDiretoraPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                         title={showDiretoraPassword ? 'Ocultar senha' : 'Ver senha'}
                       >
                         {showDiretoraPassword ? (
@@ -449,38 +416,21 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                     <button
                       type="submit"
                       id="btn-login-diretora"
-                      className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-purple-800 hover:bg-purple-900 active:bg-purple-950 text-white text-xs font-bold rounded-xl shadow-xs transition-colors"
+                      className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-xs font-bold rounded-xl shadow-xs transition-colors"
                     >
                       <ShieldCheck className="w-4 h-4" />
                       <span>Entrar como Diretora</span>
                     </button>
                   </div>
                 </form>
-
-                {/* Quick Auto-fill button for director */}
-                <div className="mt-5 pt-4 border-t border-stone-100">
-                  <button
-                    type="button"
-                    onClick={handleFillDiretoraDemo}
-                    className="w-full py-2 px-3 rounded-xl border border-purple-200 bg-purple-50 hover:bg-purple-100/70 transition-colors flex items-center justify-between text-xs"
-                  >
-                    <div className="flex items-center gap-2 text-purple-900">
-                      <KeyRound className="w-3.5 h-3.5 text-purple-700" />
-                      <span className="font-semibold">Preencher automaticamente (admin / 123)</span>
-                    </div>
-                    <span className="text-[10px] font-bold bg-purple-200 text-purple-900 px-2 py-0.5 rounded-md">
-                      Preencher
-                    </span>
-                  </button>
-                </div>
               </div>
             )}
           </div>
         </div>
 
         {/* Footer info */}
-        <p className="text-center text-xs text-stone-600 mt-4">
-          Sistema Oficial de Gestão Pedagógica Digital • 2026
+        <p className="text-center text-xs text-slate-400 mt-6 font-medium">
+          Plataforma Institucional de Avaliação Pedagógica
         </p>
       </div>
     </div>

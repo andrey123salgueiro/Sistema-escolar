@@ -350,7 +350,7 @@ export const DirectorDashboard: React.FC<DirectorDashboardProps> = ({
                       {/* Visto Status */}
                       <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
                         {isSigned ? (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
                             <CheckCircle2 className="w-3 h-3" />
                             Visto Registrado
                           </span>

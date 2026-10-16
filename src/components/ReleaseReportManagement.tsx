@@ -461,12 +461,12 @@ export const ReleaseReportManagement: React.FC<ReleaseReportManagementProps> = (
                       <span className="font-bold text-xs text-stone-900">
                         {report.classGroup}
                       </span>
-                      <span className="text-stone-300">•</span>
+                      <span className="text-stone-300" aria-hidden="true">/</span>
                       <span className="text-xs font-semibold text-stone-700">
                         {report.component}
                       </span>
-                      <span className="text-stone-300">•</span>
-                      <span className="text-xs text-stone-500">
+                      <span className="text-stone-300" aria-hidden="true">/</span>
+                      <span className="text-xs text-stone-500 font-medium">
                         {report.bimester}
                       </span>
 

@@ -1,18 +1,21 @@
 import React from 'react';
 import { User } from '../types';
+import { Logo } from './Logo';
 import {
-  GraduationCap,
   FileText,
   Users,
   HelpCircle,
   LogOut,
-  School,
-  PlusCircle,
   Archive,
   RefreshCw,
-  ShieldCheck,
   Send,
   Edit3,
+  TrendingUp,
+  Layers,
+  FileSpreadsheet,
+  Eye,
+  Cloud,
+  CheckCircle2,
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -21,6 +24,7 @@ interface HeaderProps {
   onSelectTab: (tab: string) => void;
   onLogout: () => void;
   onResetData: () => void;
+  isCloudSynced?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -29,38 +33,62 @@ export const Header: React.FC<HeaderProps> = ({
   onSelectTab,
   onLogout,
   onResetData,
+  isCloudSynced = true,
 }) => {
   const isDiretora = currentUser.role === 'diretora';
 
   return (
-    <header className="bg-white border-b border-stone-200 sticky top-0 z-40 shadow-xs">
-      {/* Top institution bar */}
-      <div className="bg-stone-900 text-stone-100 px-4 py-2 text-xs">
+    <header className="bg-white border-b border-slate-200/90 sticky top-0 z-40 shadow-xs">
+      {/* Top Institutional Ribbon */}
+      <div className="bg-slate-950 text-slate-300 px-4 py-1.5 text-xs font-sans border-b border-slate-800">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <School className="w-4 h-4 text-amber-400 shrink-0" />
-            <span className="font-semibold tracking-wide">
-              ESCOLA ESTADUAL DO CAMPO FREI GRACIANO DROESSLER
+          {/* Institutional Breadcrumb */}
+          <div className="flex items-center gap-2 text-[11px] tracking-wide">
+            <span className="font-bold text-white uppercase">
+              Escola Estadual do Campo Frei Graciano Droessler
             </span>
-            <span className="text-stone-400 hidden sm:inline">•</span>
-            <span className="text-stone-300 hidden sm:inline">
+            <span className="text-slate-600 hidden sm:inline" aria-hidden="true">/</span>
+            <span className="text-slate-400 hidden sm:inline font-medium">
               Ensino Fundamental em Tempo Integral
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* System Telemetry & Utilities */}
+          <div className="flex items-center gap-3 text-[11px]">
+            <div
+              className={`flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium border ${
+                isCloudSynced
+                  ? 'bg-slate-900 border-emerald-500/30 text-emerald-300'
+                  : 'bg-slate-900 border-amber-500/30 text-amber-300'
+              }`}
+              title={
+                isCloudSynced
+                  ? 'Sincronização em nuvem ativa em tempo real'
+                  : 'Conectando ao banco de dados...'
+              }
+            >
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${
+                  isCloudSynced ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
+                }`}
+              />
+              <span className="font-mono text-[10px] tracking-tight">
+                {isCloudSynced ? 'Nuvem Conectada' : 'Sincronizando'}
+              </span>
+            </div>
+
             <button
               onClick={() => {
                 if (
                   window.confirm(
-                    'Deseja restaurar as perguntas e professores para os dados iniciais padrão?'
+                    'Deseja restaurar as perguntas e professores para os dados iniciais padrão do sistema?'
                   )
                 ) {
                   onResetData();
                 }
               }}
-              title="Restaurar dados padrão do sistema"
-              className="text-stone-400 hover:text-stone-200 flex items-center gap-1 transition-colors text-[11px]"
+              title="Restaurar dados padrão"
+              className="text-slate-400 hover:text-white flex items-center gap-1 transition-colors text-[11px]"
             >
               <RefreshCw className="w-3 h-3" />
               <span>Restaurar Padrão</span>
@@ -69,160 +97,216 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Main navigation */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div
-              className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 shadow-xs ${
-                isDiretora
-                  ? 'bg-purple-50 border border-purple-200 text-purple-700'
-                  : 'bg-emerald-50 border border-emerald-200 text-emerald-700'
-              }`}
-            >
-              {isDiretora ? (
-                <ShieldCheck className="w-6 h-6" />
-              ) : (
-                <GraduationCap className="w-6 h-6" />
-              )}
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-lg font-bold text-stone-900 leading-tight">
-                  Pré-Conselho Escolar Digital
-                </h1>
-                <span
-                  className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${
-                    isDiretora
-                      ? 'bg-purple-50 text-purple-700 border-purple-200'
-                      : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                  }`}
-                >
-                  {isDiretora ? 'Ambiente da Diretora' : 'Ambiente do Professor'}
-                </span>
-              </div>
-              <p className="text-xs text-stone-700">
-                {isDiretora
-                  ? 'Gestão de professores, perguntas e homologação de relatórios'
-                  : `Docente: ${currentUser.name} (${currentUser.subject || 'Geral'})`}
-              </p>
+      {/* Main Bar: Logo, Navigation Tabs, and User Action */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          {/* Left: Custom High-End Logo */}
+          <div className="flex items-center justify-between">
+            <Logo size="md" variant="dark" />
+
+            {/* Mobile User/Logout Quick Action */}
+            <div className="flex lg:hidden items-center gap-2">
+              <button
+                onClick={onLogout}
+                className="p-1.5 text-slate-500 hover:text-rose-600 rounded-lg hover:bg-slate-100 transition-colors"
+                title="Sair do sistema"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
             </div>
           </div>
 
-          {/* Navigation tabs & Logout button */}
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Nav tabs depending strictly on role */}
-            <div className="flex items-center bg-stone-100 p-1 rounded-lg border border-stone-200 text-xs font-medium text-stone-600">
-              {isDiretora ? (
-                <>
-                  <button
-                    id="tab-diretora-archive"
-                    onClick={() => onSelectTab('archive')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all ${
-                      activeTab === 'archive'
-                        ? 'bg-white text-stone-900 shadow-xs font-semibold'
-                        : 'hover:text-stone-900'
-                    }`}
-                  >
-                    <Archive className="w-3.5 h-3.5 text-purple-600" />
-                    <span>Relatórios Arquivados</span>
-                  </button>
-                  <button
-                    id="tab-diretora-release"
-                    onClick={() => onSelectTab('release')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all ${
-                      activeTab === 'release'
-                        ? 'bg-white text-stone-900 shadow-xs font-semibold'
-                        : 'hover:text-stone-900'
-                    }`}
-                  >
-                    <Send className="w-3.5 h-3.5 text-purple-600" />
-                    <span>Liberar Fichas</span>
-                  </button>
-                  <button
-                    id="tab-diretora-teachers"
-                    onClick={() => onSelectTab('teachers')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all ${
-                      activeTab === 'teachers'
-                        ? 'bg-white text-stone-900 shadow-xs font-semibold'
-                        : 'hover:text-stone-900'
-                    }`}
-                  >
-                    <Users className="w-3.5 h-3.5 text-purple-600" />
-                    <span>Cadastrar Professores</span>
-                  </button>
-                  <button
-                    id="tab-diretora-questions"
-                    onClick={() => onSelectTab('questions')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all ${
-                      activeTab === 'questions'
-                        ? 'bg-white text-stone-900 shadow-xs font-semibold'
-                        : 'hover:text-stone-900'
-                    }`}
-                  >
-                    <HelpCircle className="w-3.5 h-3.5 text-purple-600" />
-                    <span>Gerenciar Perguntas</span>
-                  </button>
-                </>
-              ) : (
-                <>
-                  {activeTab === 'new-form' && (
-                    <button
-                      id="tab-teacher-editing"
-                      onClick={() => onSelectTab('new-form')}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white text-stone-900 shadow-xs font-semibold"
-                    >
-                      <Edit3 className="w-3.5 h-3.5 text-amber-600" />
-                      <span>Preenchendo Ficha</span>
-                    </button>
-                  )}
-                  <button
-                    id="tab-teacher-my-reports"
-                    onClick={() => onSelectTab('my-reports')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all ${
-                      activeTab === 'my-reports'
-                        ? 'bg-white text-stone-900 shadow-xs font-semibold'
-                        : 'hover:text-stone-900'
-                    }`}
-                  >
-                    <FileText className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Minhas Fichas</span>
-                  </button>
-                </>
-              )}
-            </div>
-
-            {/* User identification badge & Logout */}
-            <div className="flex items-center gap-2">
-              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-stone-50 border border-stone-200 rounded-lg text-xs">
-                <div
-                  className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] text-white ${
-                    isDiretora ? 'bg-purple-700' : 'bg-emerald-700'
+          {/* Center: Navigation Tabs */}
+          <nav
+            aria-label="Navegação Principal"
+            className="flex items-center overflow-x-auto p-1 bg-slate-100/90 rounded-xl border border-slate-200/80 gap-1 text-xs font-medium"
+          >
+            {isDiretora ? (
+              <>
+                <button
+                  id="tab-diretora-archive"
+                  onClick={() => onSelectTab('archive')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors ${
+                    activeTab === 'archive'
+                      ? 'bg-slate-900 text-white font-semibold shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
                   }`}
                 >
-                  {currentUser.name.charAt(0)}
-                </div>
-                <div className="text-left max-w-[130px] truncate">
-                  <p className="font-semibold leading-tight truncate text-stone-900">
-                    {currentUser.name}
-                  </p>
-                  <p className="text-[10px] text-stone-700 truncate">
-                    {isDiretora ? 'Diretora' : currentUser.subject || 'Professor(a)'}
-                  </p>
-                </div>
-              </div>
+                  <Archive className="w-3.5 h-3.5" />
+                  <span>Fichas Arquivadas</span>
+                </button>
 
-              {/* Logout Button */}
-              <button
-                onClick={onLogout}
-                id="btn-logout"
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-colors shadow-xs"
-                title="Sair da conta e voltar para a tela de login"
-              >
-                <LogOut className="w-3.5 h-3.5 text-red-600" />
-                <span>Sair</span>
-              </button>
+                <button
+                  id="tab-diretora-performance"
+                  onClick={() => onSelectTab('performance')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors ${
+                    activeTab === 'performance'
+                      ? 'bg-slate-900 text-white font-semibold shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                  }`}
+                >
+                  <TrendingUp className="w-3.5 h-3.5" />
+                  <span>Desempenho Geral</span>
+                </button>
+
+                <button
+                  id="tab-diretora-panorama"
+                  onClick={() => onSelectTab('panorama')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors ${
+                    activeTab === 'panorama'
+                      ? 'bg-slate-900 text-white font-semibold shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                  }`}
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                  <span>Panorama da Turma</span>
+                </button>
+
+                <button
+                  id="tab-diretora-students"
+                  onClick={() => onSelectTab('students')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors ${
+                    activeTab === 'students'
+                      ? 'bg-slate-900 text-white font-semibold shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                  }`}
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5" />
+                  <span>Alunos e Turmas</span>
+                </button>
+
+                <button
+                  id="tab-diretora-classes"
+                  onClick={() => onSelectTab('classes')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors ${
+                    activeTab === 'classes'
+                      ? 'bg-slate-900 text-white font-semibold shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                  }`}
+                >
+                  <Layers className="w-3.5 h-3.5" />
+                  <span>Turmas</span>
+                </button>
+
+                <button
+                  id="tab-diretora-release"
+                  onClick={() => onSelectTab('release')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors ${
+                    activeTab === 'release'
+                      ? 'bg-slate-900 text-white font-semibold shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                  }`}
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  <span>Liberar Fichas</span>
+                </button>
+
+                <button
+                  id="tab-diretora-teachers"
+                  onClick={() => onSelectTab('teachers')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors ${
+                    activeTab === 'teachers'
+                      ? 'bg-slate-900 text-white font-semibold shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                  }`}
+                >
+                  <Users className="w-3.5 h-3.5" />
+                  <span>Professores</span>
+                </button>
+
+                <button
+                  id="tab-diretora-questions"
+                  onClick={() => onSelectTab('questions')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors ${
+                    activeTab === 'questions'
+                      ? 'bg-slate-900 text-white font-semibold shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                  }`}
+                >
+                  <HelpCircle className="w-3.5 h-3.5" />
+                  <span>Perguntas</span>
+                </button>
+              </>
+            ) : (
+              <>
+                {activeTab === 'new-form' && (
+                  <button
+                    id="tab-teacher-editing"
+                    onClick={() => onSelectTab('new-form')}
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-amber-600 text-white font-semibold shadow-xs whitespace-nowrap"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" />
+                    <span>Preenchendo Ficha</span>
+                  </button>
+                )}
+
+                <button
+                  id="tab-teacher-my-reports"
+                  onClick={() => onSelectTab('my-reports')}
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg whitespace-nowrap transition-colors ${
+                    activeTab === 'my-reports'
+                      ? 'bg-slate-900 text-white font-semibold shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                  }`}
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>Minhas Fichas</span>
+                </button>
+
+                <button
+                  id="tab-teacher-panorama"
+                  onClick={() => onSelectTab('panorama')}
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg whitespace-nowrap transition-colors ${
+                    activeTab === 'panorama'
+                      ? 'bg-slate-900 text-white font-semibold shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                  }`}
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                  <span>Panorama da Turma</span>
+                </button>
+
+                <button
+                  id="tab-teacher-performance"
+                  onClick={() => onSelectTab('performance')}
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg whitespace-nowrap transition-colors ${
+                    activeTab === 'performance'
+                      ? 'bg-slate-900 text-white font-semibold shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                  }`}
+                >
+                  <TrendingUp className="w-3.5 h-3.5" />
+                  <span>Desempenho da Turma</span>
+                </button>
+              </>
+            )}
+          </nav>
+
+          {/* Right: User Identity & Sign Out */}
+          <div className="hidden lg:flex items-center gap-3">
+            <div className="flex items-center gap-2.5 pl-3 border-l border-slate-200">
+              <div className="w-8 h-8 rounded-lg bg-slate-900 text-amber-400 flex items-center justify-center font-bold text-xs font-mono shadow-xs border border-slate-800">
+                {currentUser.name.charAt(0)}
+              </div>
+              <div className="text-left text-xs leading-tight">
+                <p className="font-semibold text-slate-900 truncate max-w-[140px]">
+                  {currentUser.name}
+                </p>
+                <p className="text-[11px] text-slate-500 font-medium">
+                  {isDiretora ? 'Diretoria Escolar' : currentUser.subject || 'Docente'}
+                </p>
+              </div>
             </div>
+
+            <button
+              onClick={onLogout}
+              id="btn-logout"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-rose-700 bg-slate-100 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 rounded-lg transition-colors"
+              title="Sair do sistema"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Sair</span>
+            </button>
           </div>
         </div>
       </div>

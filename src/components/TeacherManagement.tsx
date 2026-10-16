@@ -72,37 +72,49 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !email.trim()) {
-      alert('Por favor, preencha o nome e o e-mail do professor.');
+    if (!name.trim()) {
+      alert('Por favor, preencha o nome do professor.');
       return;
     }
+
+    const cleanName = name.trim();
+    const cleanEmail =
+      email.trim() ||
+      `${cleanName
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]/g, '.')}@escola.gov.br`;
+    const cleanPass = password.trim() || '123';
 
     if (editingTeacherId) {
       const existing = teachers.find((t) => t.id === editingTeacherId);
       if (existing) {
         onUpdateTeacher({
           ...existing,
-          name: name.trim(),
-          email: email.trim(),
-          password: password.trim() || '123',
+          name: cleanName,
+          username: cleanName,
+          email: cleanEmail,
+          password: cleanPass,
           subject,
           classes: selectedClasses,
         });
-        setFeedbackMsg(`Dados do professor(a) "${name}" atualizados com sucesso!`);
+        setFeedbackMsg(`Dados do professor(a) "${cleanName}" atualizados com sucesso!`);
       }
     } else {
       const newTeacher: User = {
         id: `prof-${Date.now()}`,
-        name: name.trim(),
-        email: email.trim(),
-        password: password.trim() || '123',
+        name: cleanName,
+        username: cleanName,
+        email: cleanEmail,
+        password: cleanPass,
         role: 'professor',
         subject,
         classes: selectedClasses,
         createdAt: new Date().toISOString().split('T')[0],
       };
       onAddTeacher(newTeacher);
-      setFeedbackMsg(`Professor(a) "${name}" cadastrado com sucesso! Senha: "${password.trim() || '123'}".`);
+      setFeedbackMsg(`Professor(a) "${cleanName}" cadastrado com sucesso! Usuário: "${cleanName}" | Senha: "123".`);
     }
 
     setTimeout(() => setFeedbackMsg(null), 4000);
@@ -177,27 +189,29 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({
               {/* Nome */}
               <div>
                 <label className="block text-xs font-semibold text-stone-700 mb-1">
-                  Nome Completo do(a) Professor(a) *
+                  Nome do(a) Professor(a) (Usuário de Acesso) *
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="Ex: João da Silva Santos"
+                  placeholder="Ex: Carlos Eduardo Souza"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-stone-50 border border-stone-300 rounded-lg px-3 py-2 text-xs text-stone-900 focus:bg-white focus:ring-2 focus:ring-amber-500"
+                  className="w-full bg-stone-50 border border-stone-300 rounded-lg px-3 py-2 text-xs text-stone-900 focus:bg-white focus:ring-2 focus:ring-amber-500 font-medium"
                 />
+                <p className="text-[11px] text-stone-500 mt-0.5">
+                  O professor utilizará este nome para entrar no sistema.
+                </p>
               </div>
 
               {/* Email / Login */}
               <div>
                 <label className="block text-xs font-semibold text-stone-700 mb-1">
-                  E-mail Institucional (Login) *
+                  E-mail Institucional (Opcional)
                 </label>
                 <input
                   type="email"
-                  required
-                  placeholder="Ex: joao.silva@escola.gov.br"
+                  placeholder="Deixe vazio para gerar automaticamente"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-stone-50 border border-stone-300 rounded-lg px-3 py-2 text-xs text-stone-900 focus:bg-white focus:ring-2 focus:ring-amber-500"
@@ -207,17 +221,17 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({
               {/* Senha */}
               <div>
                 <label className="block text-xs font-semibold text-stone-700 mb-1">
-                  Senha de Acesso do Docente *
+                  Senha de Acesso (Padrão: 123) *
                 </label>
                 <div className="relative">
                   <Lock className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     required
-                    placeholder="Padrão: 123"
+                    placeholder="123"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-8 pr-3 py-2 bg-stone-50 border border-stone-300 rounded-lg text-xs text-stone-900 focus:bg-white focus:ring-2 focus:ring-amber-500 font-mono"
+                    className="w-full pl-8 pr-3 py-2 bg-stone-50 border border-stone-300 rounded-lg text-xs text-stone-900 focus:bg-white focus:ring-2 focus:ring-amber-500 font-mono font-bold"
                   />
                 </div>
               </div>
