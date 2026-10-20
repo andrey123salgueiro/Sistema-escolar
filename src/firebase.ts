@@ -248,12 +248,32 @@ export function subscribeStudents(callback: (students: Student[]) => void): Unsu
   );
 }
 
+// Helper: Recursively clean undefined values before sending to Firestore
+export function sanitizeForFirestore<T>(data: T): T {
+  if (data === null || data === undefined) {
+    return data;
+  }
+  if (Array.isArray(data)) {
+    return data.map((item) => sanitizeForFirestore(item)) as unknown as T;
+  }
+  if (typeof data === 'object') {
+    const clean: Record<string, any> = {};
+    for (const [key, value] of Object.entries(data)) {
+      if (value !== undefined) {
+        clean[key] = sanitizeForFirestore(value);
+      }
+    }
+    return clean as T;
+  }
+  return data;
+}
+
 // 5. Database Mutation Helpers
 
 export async function saveUserDoc(user: User): Promise<void> {
   const path = `users/${user.id}`;
   try {
-    await setDoc(doc(db, 'users', user.id), user);
+    await setDoc(doc(db, 'users', user.id), sanitizeForFirestore(user));
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, path);
   }
@@ -271,7 +291,7 @@ export async function deleteUserDoc(userId: string): Promise<void> {
 export async function saveQuestionDoc(question: Question): Promise<void> {
   const path = `questions/${question.id}`;
   try {
-    await setDoc(doc(db, 'questions', question.id), question);
+    await setDoc(doc(db, 'questions', question.id), sanitizeForFirestore(question));
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, path);
   }
@@ -289,7 +309,7 @@ export async function deleteQuestionDoc(questionId: string): Promise<void> {
 export async function saveSectionDoc(section: QuestionSection): Promise<void> {
   const path = `sections/${section.id}`;
   try {
-    await setDoc(doc(db, 'sections', section.id), section);
+    await setDoc(doc(db, 'sections', section.id), sanitizeForFirestore(section));
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, path);
   }
@@ -298,7 +318,7 @@ export async function saveSectionDoc(section: QuestionSection): Promise<void> {
 export async function saveReportDoc(report: PreCouncilReport): Promise<void> {
   const path = `reports/${report.id}`;
   try {
-    await setDoc(doc(db, 'reports', report.id), report);
+    await setDoc(doc(db, 'reports', report.id), sanitizeForFirestore(report));
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, path);
   }
@@ -316,7 +336,8 @@ export async function deleteReportDoc(reportId: string): Promise<void> {
 export async function saveClassDoc(cls: SchoolClass): Promise<void> {
   const path = `classes/${cls.id}`;
   try {
-    await setDoc(doc(db, 'classes', cls.id), cls);
+    const cleanCls = sanitizeForFirestore(cls);
+    await setDoc(doc(db, 'classes', cls.id), cleanCls);
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, path);
   }
@@ -334,7 +355,7 @@ export async function deleteClassDoc(classId: string): Promise<void> {
 export async function saveStudentDoc(student: Student): Promise<void> {
   const path = `students/${student.id}`;
   try {
-    await setDoc(doc(db, 'students', student.id), student);
+    await setDoc(doc(db, 'students', student.id), sanitizeForFirestore(student));
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, path);
   }
@@ -345,7 +366,7 @@ export async function batchSaveStudents(students: Student[]): Promise<void> {
   try {
     const batch = writeBatch(db);
     students.forEach((student) => {
-      batch.set(doc(db, 'students', student.id), student);
+      batch.set(doc(db, 'students', student.id), sanitizeForFirestore(student));
     });
     await batch.commit();
   } catch (error) {

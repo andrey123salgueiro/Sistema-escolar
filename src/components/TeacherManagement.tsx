@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User } from '../types';
+import { User, SchoolClass } from '../types';
 import {
   AVAILABLE_CLASSES,
   AVAILABLE_SUBJECTS,
@@ -22,6 +22,7 @@ import { ConfirmDialog } from './ConfirmDialog';
 
 interface TeacherManagementProps {
   teachers: User[];
+  classes?: SchoolClass[];
   onAddTeacher: (newTeacher: User) => void;
   onUpdateTeacher: (teacher: User) => void;
   onDeleteTeacher: (teacherId: string) => void;
@@ -29,10 +30,13 @@ interface TeacherManagementProps {
 
 export const TeacherManagement: React.FC<TeacherManagementProps> = ({
   teachers,
+  classes,
   onAddTeacher,
   onUpdateTeacher,
   onDeleteTeacher,
 }) => {
+  const availableClassNames =
+    classes && classes.length > 0 ? classes.map((c) => c.name) : AVAILABLE_CLASSES;
   const [showForm, setShowForm] = useState(false);
   const [editingTeacherId, setEditingTeacherId] = useState<string | null>(null);
 
@@ -264,7 +268,7 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({
                 Turmas em que o docente leciona:
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2 bg-stone-50 p-3 rounded-xl border border-stone-200">
-                {AVAILABLE_CLASSES.map((cls) => {
+                {availableClassNames.map((cls) => {
                   const isChecked = selectedClasses.includes(cls);
                   return (
                     <label

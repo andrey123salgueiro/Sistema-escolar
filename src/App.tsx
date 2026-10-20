@@ -442,24 +442,39 @@ export default function App() {
     const updated = [...classes, newCls];
     setClasses(updated);
     saveStoredClasses(updated);
-    await saveClassDoc(newCls);
-    showToast(`Turma ${newCls.name} cadastrada e salva na nuvem!`);
+    try {
+      await saveClassDoc(newCls);
+      showToast(`Turma ${newCls.name} cadastrada e salva na nuvem!`);
+    } catch (err) {
+      console.error('Error saving class to Firestore:', err);
+      showToast(`Turma ${newCls.name} cadastrada com sucesso!`);
+    }
   };
 
   const handleUpdateClass = async (cls: SchoolClass) => {
     const updated = classes.map((c) => (c.id === cls.id ? cls : c));
     setClasses(updated);
     saveStoredClasses(updated);
-    await saveClassDoc(cls);
-    showToast('Turma atualizada com sucesso.');
+    try {
+      await saveClassDoc(cls);
+      showToast('Turma atualizada com sucesso.');
+    } catch (err) {
+      console.error('Error updating class in Firestore:', err);
+      showToast('Turma atualizada.');
+    }
   };
 
   const handleDeleteClass = async (classId: string) => {
     const updated = classes.filter((c) => c.id !== classId);
     setClasses(updated);
     saveStoredClasses(updated);
-    await deleteClassDoc(classId);
-    showToast('Turma removida com sucesso.');
+    try {
+      await deleteClassDoc(classId);
+      showToast('Turma removida com sucesso.');
+    } catch (err) {
+      console.error('Error deleting class in Firestore:', err);
+      showToast('Turma removida.');
+    }
   };
 
   // Student Management actions
@@ -650,6 +665,7 @@ export default function App() {
               <ReleaseReportManagement
                 teachers={onlyTeachers}
                 reports={reports}
+                classes={classes}
                 onReleaseReports={handleReleaseReports}
                 onCancelRelease={handleCancelRelease}
                 onOpenReport={(rep) => setViewingReport(rep)}
@@ -659,6 +675,7 @@ export default function App() {
             {activeTab === 'teachers' && (
               <TeacherManagement
                 teachers={onlyTeachers}
+                classes={classes}
                 onAddTeacher={handleAddTeacher}
                 onUpdateTeacher={handleUpdateTeacher}
                 onDeleteTeacher={handleDeleteTeacher}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PreCouncilReport, User } from '../types';
+import { PreCouncilReport, User, SchoolClass } from '../types';
 import {
   Send,
   CheckCircle,
@@ -27,6 +27,7 @@ import { ConfirmDialog } from './ConfirmDialog';
 interface ReleaseReportManagementProps {
   teachers: User[];
   reports: PreCouncilReport[];
+  classes?: SchoolClass[];
   onReleaseReports: (newReports: PreCouncilReport[]) => void;
   onCancelRelease: (reportId: string) => void;
   onOpenReport: (report: PreCouncilReport) => void;
@@ -35,16 +36,21 @@ interface ReleaseReportManagementProps {
 export const ReleaseReportManagement: React.FC<ReleaseReportManagementProps> = ({
   teachers,
   reports,
+  classes,
   onReleaseReports,
   onCancelRelease,
   onOpenReport,
 }) => {
+  const availableClassNames =
+    classes && classes.length > 0 ? classes.map((c) => c.name) : AVAILABLE_CLASSES;
   const [bimester, setBimester] = useState('3º Bimestre');
   const [releaseMode, setReleaseMode] = useState<'all' | 'specific'>('all');
   const [selectedTeacherId, setSelectedTeacherId] = useState(
     teachers[0]?.id || ''
   );
-  const [selectedClass, setSelectedClass] = useState(AVAILABLE_CLASSES[0]);
+  const [selectedClass, setSelectedClass] = useState(
+    availableClassNames[0] || '6º Ano A'
+  );
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [reportToCancel, setReportToCancel] = useState<PreCouncilReport | null>(null);
@@ -336,7 +342,7 @@ export const ReleaseReportManagement: React.FC<ReleaseReportManagementProps> = (
                     onChange={(e) => setSelectedClass(e.target.value)}
                     className="w-full bg-white border border-stone-300 rounded-lg px-3 py-2 text-xs text-stone-900 focus:ring-2 focus:ring-amber-500"
                   >
-                    {AVAILABLE_CLASSES.map((cls) => (
+                    {availableClassNames.map((cls) => (
                       <option key={cls} value={cls}>
                         {cls}
                       </option>

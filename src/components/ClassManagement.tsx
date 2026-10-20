@@ -85,7 +85,7 @@ export const ClassManagement: React.FC<ClassManagementProps> = ({
           name: name.trim(),
           shift,
           year: year.trim() || '2026',
-          description: description.trim() || undefined,
+          description: description.trim() || '',
         });
         setFeedback(`Turma "${name}" atualizada com sucesso!`);
       }
@@ -101,7 +101,7 @@ export const ClassManagement: React.FC<ClassManagementProps> = ({
         name: name.trim(),
         shift,
         year: year.trim() || '2026',
-        description: description.trim() || undefined,
+        description: description.trim() || '',
       };
       onAddClass(newCls);
       setFeedback(`Turma "${name}" cadastrada com sucesso no sistema da escola!`);
