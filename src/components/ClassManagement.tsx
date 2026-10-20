@@ -12,7 +12,10 @@ import {
   School,
   Clock,
   Calendar,
+  X,
+  AlertCircle,
 } from 'lucide-react';
+import { ConfirmDialog } from './ConfirmDialog';
 
 interface ClassManagementProps {
   classes: SchoolClass[];
@@ -42,6 +45,8 @@ export const ClassManagement: React.FC<ClassManagementProps> = ({
   const [description, setDescription] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [classToDelete, setClassToDelete] = useState<SchoolClass | null>(null);
 
   const resetForm = () => {
     setName('');
@@ -49,6 +54,7 @@ export const ClassManagement: React.FC<ClassManagementProps> = ({
     setYear('2026');
     setDescription('');
     setEditingClassId(null);
+    setFormError(null);
     setShowForm(false);
   };
 
@@ -58,13 +64,16 @@ export const ClassManagement: React.FC<ClassManagementProps> = ({
     setYear(cls.year || '2026');
     setDescription(cls.description || '');
     setEditingClassId(cls.id);
+    setFormError(null);
     setShowForm(true);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
+
     if (!name.trim()) {
-      alert('Informe o nome da turma (ex: 6º Ano A)');
+      setFormError('Por favor, informe a identificação da turma (ex: 6º Ano A).');
       return;
     }
 
@@ -83,7 +92,7 @@ export const ClassManagement: React.FC<ClassManagementProps> = ({
     } else {
       // Check duplicate name
       if (classes.some((c) => c.name.toLowerCase() === name.trim().toLowerCase())) {
-        alert(`A turma "${name.trim()}" já está cadastrada!`);
+        setFormError(`A turma "${name.trim()}" já está cadastrada no sistema!`);
         return;
       }
 
@@ -149,24 +158,33 @@ export const ClassManagement: React.FC<ClassManagementProps> = ({
         </div>
       )}
 
-      {/* Class Form */}
+      {/* Class Form Modal */}
       {showForm && (
-        <div className="bg-white rounded-2xl border-2 border-amber-300 p-6 mb-8 shadow-sm">
-          <div className="flex items-center justify-between pb-3 mb-4 border-b border-stone-200">
-            <h3 className="text-sm font-bold text-stone-900 flex items-center gap-2">
-              <PlusCircle className="w-4 h-4 text-amber-700" />
-              {editingClassId ? 'Editar Dados da Turma' : 'Cadastrar Nova Turma'}
-            </h3>
-            <button
-              onClick={resetForm}
-              className="text-stone-400 hover:text-stone-600 text-xs font-medium"
-            >
-              Cancelar
-            </button>
-          </div>
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl border border-stone-200 p-6 shadow-2xl max-w-lg w-full animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3 mb-4 border-b border-stone-200">
+              <h3 className="text-sm font-bold text-stone-900 flex items-center gap-2">
+                <Layers className="w-4 h-4 text-amber-700" />
+                <span>{editingClassId ? 'Editar Dados da Turma' : 'Cadastrar Nova Turma'}</span>
+              </h3>
+              <button
+                type="button"
+                onClick={resetForm}
+                className="text-stone-400 hover:text-stone-600 p-1 rounded-lg transition-colors cursor-pointer"
+                title="Fechar"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {formError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-800 rounded-xl text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+                <span>{formError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-stone-700 mb-1">
                   Nome / Identificação da Turma *
@@ -181,66 +199,68 @@ export const ClassManagement: React.FC<ClassManagementProps> = ({
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-stone-700 mb-1">
-                  Turno de Funcionamento
-                </label>
-                <select
-                  value={shift}
-                  onChange={(e) => setShift(e.target.value as any)}
-                  className="w-full bg-stone-50 border border-stone-300 rounded-lg px-3 py-2 text-xs text-stone-900 focus:bg-white focus:ring-2 focus:ring-amber-500 font-medium"
-                >
-                  <option value="Integral">Tempo Integral</option>
-                  <option value="Manhã">Matutino (Manhã)</option>
-                  <option value="Tarde">Vespertino (Tarde)</option>
-                  <option value="Noite">Noturno</option>
-                </select>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-stone-700 mb-1">
+                    Turno de Funcionamento
+                  </label>
+                  <select
+                    value={shift}
+                    onChange={(e) => setShift(e.target.value as any)}
+                    className="w-full bg-stone-50 border border-stone-300 rounded-lg px-3 py-2 text-xs text-stone-900 focus:bg-white focus:ring-2 focus:ring-amber-500 font-medium"
+                  >
+                    <option value="Integral">Tempo Integral</option>
+                    <option value="Manhã">Matutino (Manhã)</option>
+                    <option value="Tarde">Vespertino (Tarde)</option>
+                    <option value="Noite">Noturno</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-stone-700 mb-1">
+                    Ano Letivo
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="2026"
+                    value={year}
+                    onChange={(e) => setYear(e.target.value)}
+                    className="w-full bg-stone-50 border border-stone-300 rounded-lg px-3 py-2 text-xs text-stone-900 focus:bg-white focus:ring-2 focus:ring-amber-500"
+                  />
+                </div>
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-stone-700 mb-1">
-                  Ano Letivo
+                  Descrição ou Observações Pedagógicas (Opcional)
                 </label>
                 <input
                   type="text"
-                  placeholder="2026"
-                  value={year}
-                  onChange={(e) => setYear(e.target.value)}
+                  placeholder="Ex: Ensino Fundamental II - Sala 04 - Bloco Pedagógico"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
                   className="w-full bg-stone-50 border border-stone-300 rounded-lg px-3 py-2 text-xs text-stone-900 focus:bg-white focus:ring-2 focus:ring-amber-500"
                 />
               </div>
-            </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-stone-700 mb-1">
-                Descrição ou Observações Pedagógicas (Opcional)
-              </label>
-              <input
-                type="text"
-                placeholder="Ex: Ensino Fundamental II - Sala 04 - Bloco Pedagógico"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="w-full bg-stone-50 border border-stone-300 rounded-lg px-3 py-2 text-xs text-stone-900 focus:bg-white focus:ring-2 focus:ring-amber-500"
-              />
-            </div>
-
-            <div className="pt-3 flex items-center justify-end gap-3 border-t border-stone-100">
-              <button
-                type="button"
-                onClick={resetForm}
-                className="px-4 py-2 text-xs font-semibold text-stone-600 hover:text-stone-900 bg-white border border-stone-300 rounded-xl"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                id="btn-save-class"
-                className="px-5 py-2 text-xs font-bold text-white bg-amber-700 hover:bg-amber-800 rounded-xl shadow-xs"
-              >
-                {editingClassId ? 'Salvar Alterações' : 'Cadastrar Turma'}
-              </button>
-            </div>
-          </form>
+              <div className="pt-3 flex items-center justify-end gap-3 border-t border-stone-100">
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="px-4 py-2 text-xs font-semibold text-stone-600 hover:text-stone-900 bg-white border border-stone-300 rounded-xl cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  id="btn-save-class"
+                  className="px-5 py-2 text-xs font-bold text-white bg-amber-700 hover:bg-amber-800 rounded-xl shadow-xs cursor-pointer"
+                >
+                  {editingClassId ? 'Salvar Alterações' : 'Cadastrar Turma'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
@@ -325,23 +345,17 @@ export const ClassManagement: React.FC<ClassManagementProps> = ({
 
                   <div className="flex items-center gap-1 ml-auto">
                     <button
+                      type="button"
                       onClick={() => handleEdit(cls)}
-                      className="p-1.5 text-stone-500 hover:text-stone-800 hover:bg-stone-100 rounded-lg transition-colors"
+                      className="p-1.5 text-stone-500 hover:text-stone-800 hover:bg-stone-100 rounded-lg transition-colors cursor-pointer"
                       title="Editar turma"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
                     </button>
                     <button
-                      onClick={() => {
-                        if (
-                          window.confirm(
-                            `Deseja realmente remover a turma "${cls.name}"? Isso não apagará os alunos cadastrados.`
-                          )
-                        ) {
-                          onDeleteClass(cls.id);
-                        }
-                      }}
-                      className="p-1.5 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      type="button"
+                      onClick={() => setClassToDelete(cls)}
+                      className="p-1.5 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
                       title="Excluir turma"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -353,6 +367,23 @@ export const ClassManagement: React.FC<ClassManagementProps> = ({
           })}
         </div>
       </div>
+
+      {/* Confirmation Modal for Class Deletion */}
+      <ConfirmDialog
+        isOpen={!!classToDelete}
+        title="Remover Turma"
+        message={`Deseja realmente remover a turma "${classToDelete?.name}"? Esta ação removerá a turma da lista escolar (os alunos cadastrados não serão apagados).`}
+        confirmText="Sim, Remover Turma"
+        cancelText="Cancelar"
+        variant="danger"
+        onConfirm={() => {
+          if (classToDelete) {
+            onDeleteClass(classToDelete.id);
+            setClassToDelete(null);
+          }
+        }}
+        onCancel={() => setClassToDelete(null)}
+      />
     </div>
   );
 };

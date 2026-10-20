@@ -27,6 +27,7 @@ interface ReportViewModalProps {
     role: 'diretora' | 'pedagoga',
     notes?: string
   ) => void;
+  schoolLogoUrl?: string;
 }
 
 export const ReportViewModal: React.FC<ReportViewModalProps> = ({
@@ -36,6 +37,7 @@ export const ReportViewModal: React.FC<ReportViewModalProps> = ({
   currentUser,
   onClose,
   onSignReport,
+  schoolLogoUrl,
 }) => {
   const [pedagogaNotes, setPedagogaNotes] = useState(
     report.pedagogaSignature?.notes || ''
@@ -163,8 +165,16 @@ export const ReportViewModal: React.FC<ReportViewModalProps> = ({
         <div id="printable-report-sheet" className="p-6 sm:p-10 text-stone-900 bg-white">
           {/* Official Header */}
           <div className="border-2 border-stone-800 rounded-xl p-6 sm:p-8 text-center relative mb-6">
-            <div className="flex items-center justify-center gap-3 mb-2">
-              <School className="w-8 h-8 text-stone-800" />
+            <div className="flex items-center justify-center gap-4 mb-2">
+              {schoolLogoUrl ? (
+                <img
+                  src={schoolLogoUrl}
+                  alt="Brasão Oficial da Escola"
+                  className="w-16 h-16 object-contain shrink-0"
+                />
+              ) : (
+                <School className="w-8 h-8 text-stone-800 shrink-0" />
+              )}
               <div>
                 <h1 className="text-base sm:text-lg font-extrabold uppercase tracking-wide font-serif text-stone-900">
                   {report.schoolName}

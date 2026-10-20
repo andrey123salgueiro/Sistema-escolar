@@ -12,6 +12,14 @@ export const SCHOOL_NAME = 'ESCOLA ESTADUAL DO CAMPO FREI GRACIANO DROESSLER';
 export const SCHOOL_SUBTITLE = 'ENSINO FUNDAMENTAL EM TEMPO INTEGRAL';
 export const REPORT_TITLE = 'FICHA INDIVIDUAL DE PRÉ-CONSELHO DE CLASSE';
 
+// Informações Oficiais de Desenvolvimento e Instituição
+export const DEVELOPER_NAME = 'Andrey Salgueiro';
+export const DEVELOPER_EMAIL = 'andreysalgueiro95@gmail.com';
+export const SYSTEM_VERSION = '1.0.0 Oficial';
+export const SYSTEM_YEAR = '2026';
+// Brasão Oficial da Escola Estadual do Campo Frei Graciano Droessler
+export const DEFAULT_SCHOOL_LOGO_URL = '/school-logo.jpg';
+
 export const EVALUATION_DIMENSIONS: ClassDimension[] = [
   {
     id: 'aprendizagem',

@@ -18,6 +18,7 @@ import {
   Check,
   X,
 } from 'lucide-react';
+import { ConfirmDialog } from './ConfirmDialog';
 
 interface StudentManagementProps {
   students: Student[];
@@ -57,6 +58,7 @@ export const StudentManagement: React.FC<StudentManagementProps> = ({
   );
   const [searchTerm, setSearchTerm] = useState('');
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [studentToDelete, setStudentToDelete] = useState<Student | null>(null);
 
   // Excel Import States
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -93,7 +95,8 @@ export const StudentManagement: React.FC<StudentManagementProps> = ({
   const handleManualSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
-      alert('Informe o nome do aluno.');
+      setFeedback('Por favor, informe o nome do estudante.');
+      setTimeout(() => setFeedback(null), 3500);
       return;
     }
 
@@ -788,16 +791,9 @@ export const StudentManagement: React.FC<StudentManagementProps> = ({
                         <Edit2 className="w-3.5 h-3.5" />
                       </button>
                       <button
-                        onClick={() => {
-                          if (
-                            window.confirm(
-                              `Deseja realmente remover o estudante "${std.name}"?`
-                            )
-                          ) {
-                            onDeleteStudent(std.id);
-                          }
-                        }}
-                        className="p-1.5 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors inline-flex"
+                        type="button"
+                        onClick={() => setStudentToDelete(std)}
+                        className="p-1.5 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors inline-flex cursor-pointer"
                         title="Excluir aluno"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -810,6 +806,23 @@ export const StudentManagement: React.FC<StudentManagementProps> = ({
           </div>
         )}
       </div>
+
+      {/* Confirmation Modal for Student Deletion */}
+      <ConfirmDialog
+        isOpen={!!studentToDelete}
+        title="Remover Estudante"
+        message={`Deseja realmente remover o estudante "${studentToDelete?.name}" (${studentToDelete?.classGroup})?`}
+        confirmText="Sim, Remover Aluno"
+        cancelText="Cancelar"
+        variant="danger"
+        onConfirm={() => {
+          if (studentToDelete) {
+            onDeleteStudent(studentToDelete.id);
+            setStudentToDelete(null);
+          }
+        }}
+        onCancel={() => setStudentToDelete(null)}
+      />
     </div>
   );
 };

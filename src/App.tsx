@@ -51,8 +51,11 @@ import {
   INITIAL_REPORTS,
   INITIAL_CLASSES,
   INITIAL_STUDENTS,
+  DEFAULT_SCHOOL_LOGO_URL,
 } from './data/initialData';
 import { Header } from './components/Header';
+import { Footer } from './components/Footer';
+import { ContactModal } from './components/ContactModal';
 import { LoginScreen } from './components/LoginScreen';
 import { ReportForm } from './components/ReportForm';
 import { TeacherReportList } from './components/TeacherReportList';
@@ -76,6 +79,24 @@ export default function App() {
   const [classes, setClasses] = useState<SchoolClass[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [isCloudSynced, setIsCloudSynced] = useState<boolean>(true);
+
+  // School crest / logo state (official school crest)
+  const [schoolLogoUrl, setSchoolLogoUrlState] = useState<string>(() => {
+    const saved = localStorage.getItem('school_custom_logo');
+    return saved && saved.trim() !== '' ? saved : DEFAULT_SCHOOL_LOGO_URL;
+  });
+
+  const handleUpdateSchoolLogo = (url: string) => {
+    setSchoolLogoUrlState(url);
+    if (url) {
+      localStorage.setItem('school_custom_logo', url);
+    } else {
+      localStorage.removeItem('school_custom_logo');
+    }
+  };
+
+  // Contact Modal State
+  const [isContactModalOpen, setIsContactModalOpen] = useState<boolean>(false);
 
   // Navigation tab
   const [activeTab, setActiveTab] = useState<string>('archive');
@@ -510,7 +531,19 @@ export default function App() {
             <span>{toastMessage}</span>
           </div>
         )}
-        <LoginScreen users={users} onLoginSuccess={handleLoginSuccess} />
+        <LoginScreen
+          users={users}
+          onLoginSuccess={handleLoginSuccess}
+          schoolLogoUrl={schoolLogoUrl}
+          onOpenContact={() => setIsContactModalOpen(true)}
+        />
+        <ContactModal
+          isOpen={isContactModalOpen}
+          onClose={() => setIsContactModalOpen(false)}
+          currentUser={null}
+          currentLogoUrl={schoolLogoUrl}
+          onUpdateLogoUrl={handleUpdateSchoolLogo}
+        />
       </div>
     );
   }
@@ -533,6 +566,8 @@ export default function App() {
         currentUser={currentUser}
         activeTab={activeTab}
         isCloudSynced={isCloudSynced}
+        schoolLogoUrl={schoolLogoUrl}
+        onOpenContact={() => setIsContactModalOpen(true)}
         onSelectTab={(tab) => {
           setActiveTab(tab);
           if (tab === 'new-form') {
@@ -710,6 +745,21 @@ export default function App() {
         )}
       </main>
 
+      {/* Institutional School Footer with Developer Credits */}
+      <Footer
+        onOpenContact={() => setIsContactModalOpen(true)}
+        schoolLogoUrl={schoolLogoUrl}
+      />
+
+      {/* Developer Contact & Logo Configuration Modal */}
+      <ContactModal
+        isOpen={isContactModalOpen}
+        onClose={() => setIsContactModalOpen(false)}
+        currentUser={currentUser}
+        currentLogoUrl={schoolLogoUrl}
+        onUpdateLogoUrl={handleUpdateSchoolLogo}
+      />
+
       {/* Official Report Inspection & Print Modal */}
       {viewingReport && (
         <ReportViewModal
@@ -717,6 +767,7 @@ export default function App() {
           questions={questions}
           sections={sections}
           currentUser={currentUser}
+          schoolLogoUrl={schoolLogoUrl}
           onClose={() => setViewingReport(null)}
           onSignReport={handleSignReportFromModal}
         />

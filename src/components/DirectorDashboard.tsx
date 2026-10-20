@@ -16,6 +16,7 @@ import {
   AlertCircle,
   FileSpreadsheet,
 } from 'lucide-react';
+import { ConfirmDialog } from './ConfirmDialog';
 
 interface DirectorDashboardProps {
   reports: PreCouncilReport[];
@@ -39,6 +40,7 @@ export const DirectorDashboard: React.FC<DirectorDashboardProps> = ({
   const [selectedTeacher, setSelectedTeacher] = useState('all');
   const [selectedBimester, setSelectedBimester] = useState('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'signed'>('all');
+  const [reportToDelete, setReportToDelete] = useState<PreCouncilReport | null>(null);
 
   // Only consider reports that have been submitted or signed for the digital archive
   const archivedReports = reports.filter((r) => r.status === 'enviado' || r.status === 'visto');
@@ -389,12 +391,9 @@ export const DirectorDashboard: React.FC<DirectorDashboardProps> = ({
                         </button>
 
                         <button
-                          onClick={() => {
-                            if (window.confirm('Excluir permanentemente este relatório do arquivo?')) {
-                              onDeleteReport(report.id);
-                            }
-                          }}
-                          className="p-1.5 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors inline-flex"
+                          type="button"
+                          onClick={() => setReportToDelete(report)}
+                          className="p-1.5 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors inline-flex cursor-pointer"
                           title="Excluir relatório"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -408,6 +407,23 @@ export const DirectorDashboard: React.FC<DirectorDashboardProps> = ({
           </div>
         </div>
       )}
+
+      {/* Confirmation Modal for Report Deletion */}
+      <ConfirmDialog
+        isOpen={!!reportToDelete}
+        title="Excluir Ficha do Arquivo"
+        message={`Deseja realmente excluir permanentemente a ficha de ${reportToDelete?.classGroup} (${reportToDelete?.component} - ${reportToDelete?.teacherName})?`}
+        confirmText="Sim, Excluir Ficha"
+        cancelText="Cancelar"
+        variant="danger"
+        onConfirm={() => {
+          if (reportToDelete) {
+            onDeleteReport(reportToDelete.id);
+            setReportToDelete(null);
+          }
+        }}
+        onCancel={() => setReportToDelete(null)}
+      />
     </div>
   );
 };

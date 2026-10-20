@@ -5,6 +5,7 @@ interface LogoProps {
   variant?: 'light' | 'dark';
   showSubtitle?: boolean;
   className?: string;
+  schoolLogoUrl?: string;
 }
 
 export const Logo: React.FC<LogoProps> = ({
@@ -12,12 +13,19 @@ export const Logo: React.FC<LogoProps> = ({
   variant = 'dark',
   showSubtitle = true,
   className = '',
+  schoolLogoUrl,
 }) => {
+  const [imgError, setImgError] = React.useState(false);
+
+  React.useEffect(() => {
+    setImgError(false);
+  }, [schoolLogoUrl]);
+
   // Dimensions
   const emblemSizes = {
-    sm: 'w-8 h-8',
-    md: 'w-10 h-10',
-    lg: 'w-14 h-14',
+    sm: 'w-9 h-9',
+    md: 'w-12 h-12',
+    lg: 'w-20 h-20',
   };
 
   const titleSizes = {
@@ -36,8 +44,18 @@ export const Logo: React.FC<LogoProps> = ({
 
   return (
     <div className={`flex items-center gap-3 select-none ${className}`}>
-      {/* Emblem SVG */}
-      <div className={`relative shrink-0 ${emblemSizes[size]} transition-transform duration-200`}>
+      {/* Emblem SVG or Custom School Logo */}
+      <div className={`relative shrink-0 flex items-center justify-center ${emblemSizes[size]} transition-transform duration-200`}>
+        {schoolLogoUrl && !imgError ? (
+          <div className="w-full h-full rounded-full bg-white p-1 shadow-sm ring-1 ring-slate-200/80 overflow-hidden flex items-center justify-center">
+            <img
+              src={schoolLogoUrl}
+              alt="Brasão Oficial da Escola Estadual do Campo Frei Graciano Droessler"
+              onError={() => setImgError(true)}
+              className="w-full h-full object-contain"
+            />
+          </div>
+        ) : (
         <svg
           viewBox="0 0 48 48"
           fill="none"
@@ -120,6 +138,7 @@ export const Logo: React.FC<LogoProps> = ({
             opacity="0.8"
           />
         </svg>
+        )}
       </div>
 
       {/* Brand Wordmark */}

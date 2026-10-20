@@ -11,6 +11,7 @@ import {
   ArrowDown,
   ArrowUp,
 } from 'lucide-react';
+import { ConfirmDialog } from './ConfirmDialog';
 
 interface QuestionManagementProps {
   questions: Question[];
@@ -32,6 +33,7 @@ export const QuestionManagement: React.FC<QuestionManagementProps> = ({
   const [showAddQuestion, setShowAddQuestion] = useState(false);
   const [showAddSection, setShowAddSection] = useState(false);
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
+  const [questionToDelete, setQuestionToDelete] = useState<Question | null>(null);
 
   // Form states for question
   const [targetSectionId, setTargetSectionId] = useState<string>(
@@ -66,7 +68,8 @@ export const QuestionManagement: React.FC<QuestionManagementProps> = ({
   const handleSaveQuestion = (e: React.FormEvent) => {
     e.preventDefault();
     if (!promptText.trim()) {
-      alert('Por favor, digite o enunciado da pergunta.');
+      setFeedback('Por favor, digite o enunciado da pergunta.');
+      setTimeout(() => setFeedback(null), 3500);
       return;
     }
 
@@ -387,16 +390,9 @@ export const QuestionManagement: React.FC<QuestionManagementProps> = ({
                         </button>
 
                         <button
-                          onClick={() => {
-                            if (
-                              window.confirm(
-                                'Deseja realmente excluir esta pergunta do questionário?'
-                              )
-                            ) {
-                              onDeleteQuestion(q.id);
-                            }
-                          }}
-                          className="p-1.5 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          type="button"
+                          onClick={() => setQuestionToDelete(q)}
+                          className="p-1.5 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
                           title="Excluir pergunta"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -410,6 +406,23 @@ export const QuestionManagement: React.FC<QuestionManagementProps> = ({
           );
         })}
       </div>
+
+      {/* Confirmation Modal for Question Deletion */}
+      <ConfirmDialog
+        isOpen={!!questionToDelete}
+        title="Excluir Pergunta"
+        message="Deseja realmente remover esta questão do questionário oficial de pré-conselho?"
+        confirmText="Sim, Excluir Pergunta"
+        cancelText="Cancelar"
+        variant="danger"
+        onConfirm={() => {
+          if (questionToDelete) {
+            onDeleteQuestion(questionToDelete.id);
+            setQuestionToDelete(null);
+          }
+        }}
+        onCancel={() => setQuestionToDelete(null)}
+      />
     </div>
   );
 };

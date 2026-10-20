@@ -12,11 +12,19 @@ import {
   User as UserIcon,
   CheckCircle2,
 } from 'lucide-react';
-import { SCHOOL_NAME, SCHOOL_SUBTITLE } from '../data/initialData';
+import {
+  SCHOOL_NAME,
+  SCHOOL_SUBTITLE,
+  DEVELOPER_NAME,
+  DEVELOPER_EMAIL,
+  SYSTEM_VERSION,
+} from '../data/initialData';
 
 interface LoginScreenProps {
   users: User[];
   onLoginSuccess: (user: User) => void;
+  schoolLogoUrl?: string;
+  onOpenContact?: () => void;
 }
 
 function normalize(str: string): string {
@@ -30,6 +38,8 @@ function normalize(str: string): string {
 export const LoginScreen: React.FC<LoginScreenProps> = ({
   users,
   onLoginSuccess,
+  schoolLogoUrl,
+  onOpenContact,
 }) => {
   // Tabs: 'professor' | 'diretora'
   const [activeTab, setActiveTab] = useState<'professor' | 'diretora'>('professor');
@@ -183,7 +193,12 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
         {/* Institutional Branding Block */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-3">
-            <Logo size="lg" variant="light" showSubtitle={false} />
+            <Logo
+              size="lg"
+              variant="light"
+              showSubtitle={false}
+              schoolLogoUrl={schoolLogoUrl}
+            />
           </div>
 
           <p className="text-xs font-bold tracking-wider text-amber-400 uppercase font-sans mt-3">
@@ -428,10 +443,32 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
           </div>
         </div>
 
-        {/* Footer info */}
-        <p className="text-center text-xs text-slate-400 mt-6 font-medium">
-          Plataforma Institucional de Avaliação Pedagógica
-        </p>
+        {/* Footer info & Developer Credits */}
+        <div className="mt-8 pt-6 border-t border-slate-800 text-center space-y-3">
+          <p className="text-xs text-slate-400 font-medium">
+            Plataforma Institucional de Avaliação Pedagógica · {SCHOOL_NAME}
+          </p>
+
+          <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-slate-400">
+            <span>
+              Desenvolvido por <strong className="text-amber-400">{DEVELOPER_NAME}</strong>
+            </span>
+            <span className="text-slate-600" aria-hidden="true">·</span>
+            <span className="text-slate-500">Versão {SYSTEM_VERSION}</span>
+            {onOpenContact && (
+              <>
+                <span className="text-slate-600" aria-hidden="true">·</span>
+                <button
+                  type="button"
+                  onClick={onOpenContact}
+                  className="text-amber-400 hover:text-amber-300 font-semibold underline underline-offset-2 transition-colors cursor-pointer"
+                >
+                  Fale Conosco
+                </button>
+              </>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

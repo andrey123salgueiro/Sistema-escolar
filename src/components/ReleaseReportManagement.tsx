@@ -22,6 +22,7 @@ import {
   REPORT_TITLE,
   AVAILABLE_CLASSES,
 } from '../data/initialData';
+import { ConfirmDialog } from './ConfirmDialog';
 
 interface ReleaseReportManagementProps {
   teachers: User[];
@@ -46,6 +47,7 @@ export const ReleaseReportManagement: React.FC<ReleaseReportManagementProps> = (
   const [selectedClass, setSelectedClass] = useState(AVAILABLE_CLASSES[0]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [reportToCancel, setReportToCancel] = useState<PreCouncilReport | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState<{
     text: string;
     type: 'success' | 'info' | 'warning';
@@ -515,19 +517,12 @@ export const ReleaseReportManagement: React.FC<ReleaseReportManagementProps> = (
                       </button>
                     )}
 
-                    {/* Cancel Release if still pending (not filled yet) */}
-                    {isPendente && (
+                    {/* Cancel Release if still pending or draft */}
+                    {(isPendente || isRascunho) && (
                       <button
-                        onClick={() => {
-                          if (
-                            window.confirm(
-                              `Deseja cancelar a liberação da ficha de "${report.classGroup} - ${report.component}" para ${report.teacherName}?`
-                            )
-                          ) {
-                            onCancelRelease(report.id);
-                          }
-                        }}
-                        className="flex items-center gap-1 px-2.5 py-1.5 text-stone-500 hover:text-red-700 hover:bg-red-50 text-xs font-semibold rounded-lg transition-colors"
+                        type="button"
+                        onClick={() => setReportToCancel(report)}
+                        className="flex items-center gap-1 px-2.5 py-1.5 text-stone-500 hover:text-red-700 hover:bg-red-50 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
                         title="Cancelar liberação desta ficha"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -541,6 +536,23 @@ export const ReleaseReportManagement: React.FC<ReleaseReportManagementProps> = (
           </div>
         )}
       </div>
+
+      {/* Confirmation Modal for Cancel Release */}
+      <ConfirmDialog
+        isOpen={!!reportToCancel}
+        title="Cancelar Liberação de Ficha"
+        message={`Deseja realmente cancelar a liberação da ficha da turma "${reportToCancel?.classGroup}" na disciplina "${reportToCancel?.component}" atribuída a ${reportToCancel?.teacherName}?`}
+        confirmText="Sim, Cancelar Liberação"
+        cancelText="Voltar"
+        variant="danger"
+        onConfirm={() => {
+          if (reportToCancel) {
+            onCancelRelease(reportToCancel.id);
+            setReportToCancel(null);
+          }
+        }}
+        onCancel={() => setReportToCancel(null)}
+      />
     </div>
   );
 };

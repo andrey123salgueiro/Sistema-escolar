@@ -17,6 +17,7 @@ import {
   Cloud,
   CheckCircle2,
 } from 'lucide-react';
+import { ConfirmDialog } from './ConfirmDialog';
 
 interface HeaderProps {
   currentUser: User;
@@ -25,6 +26,8 @@ interface HeaderProps {
   onLogout: () => void;
   onResetData: () => void;
   isCloudSynced?: boolean;
+  schoolLogoUrl?: string;
+  onOpenContact?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -34,8 +37,11 @@ export const Header: React.FC<HeaderProps> = ({
   onLogout,
   onResetData,
   isCloudSynced = true,
+  schoolLogoUrl,
+  onOpenContact,
 }) => {
   const isDiretora = currentUser.role === 'diretora';
+  const [showResetConfirm, setShowResetConfirm] = React.useState(false);
 
   return (
     <header className="bg-white border-b border-slate-200/90 sticky top-0 z-40 shadow-xs">
@@ -77,18 +83,22 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             </div>
 
+            {onOpenContact && (
+              <button
+                type="button"
+                onClick={onOpenContact}
+                title="Abrir canal de Fale Conosco"
+                className="text-amber-400 hover:text-amber-300 flex items-center gap-1 transition-colors text-[11px] font-semibold"
+              >
+                <span>Fale Conosco</span>
+              </button>
+            )}
+
             <button
-              onClick={() => {
-                if (
-                  window.confirm(
-                    'Deseja restaurar as perguntas e professores para os dados iniciais padrão do sistema?'
-                  )
-                ) {
-                  onResetData();
-                }
-              }}
+              type="button"
+              onClick={() => setShowResetConfirm(true)}
               title="Restaurar dados padrão"
-              className="text-slate-400 hover:text-white flex items-center gap-1 transition-colors text-[11px]"
+              className="text-slate-400 hover:text-white flex items-center gap-1 transition-colors text-[11px] cursor-pointer"
             >
               <RefreshCw className="w-3 h-3" />
               <span>Restaurar Padrão</span>
@@ -102,7 +112,7 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           {/* Left: Custom High-End Logo */}
           <div className="flex items-center justify-between">
-            <Logo size="md" variant="dark" />
+            <Logo size="md" variant="dark" schoolLogoUrl={schoolLogoUrl} />
 
             {/* Mobile User/Logout Quick Action */}
             <div className="flex lg:hidden items-center gap-2">
@@ -301,7 +311,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={onLogout}
               id="btn-logout"
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-rose-700 bg-slate-100 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-rose-700 bg-slate-100 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 rounded-lg transition-colors cursor-pointer"
               title="Sair do sistema"
             >
               <LogOut className="w-3.5 h-3.5" />
@@ -310,6 +320,21 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Confirmation Modal for Resetting Initial Data */}
+      <ConfirmDialog
+        isOpen={showResetConfirm}
+        title="Restaurar Dados Padrão"
+        message="Deseja restaurar as perguntas e professores para os dados iniciais padrão do sistema escolar? Alterações locais serão redefinidas."
+        confirmText="Sim, Restaurar Padrão"
+        cancelText="Cancelar"
+        variant="warning"
+        onConfirm={() => {
+          onResetData();
+          setShowResetConfirm(false);
+        }}
+        onCancel={() => setShowResetConfirm(false)}
+      />
     </header>
   );
 };

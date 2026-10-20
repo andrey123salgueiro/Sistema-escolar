@@ -18,6 +18,7 @@ import {
   KeyRound,
   Lock,
 } from 'lucide-react';
+import { ConfirmDialog } from './ConfirmDialog';
 
 interface TeacherManagementProps {
   teachers: User[];
@@ -43,6 +44,7 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({
   const [selectedClasses, setSelectedClasses] = useState<string[]>(['6º Ano A']);
   const [searchTerm, setSearchTerm] = useState('');
   const [feedbackMsg, setFeedbackMsg] = useState<string | null>(null);
+  const [teacherToDelete, setTeacherToDelete] = useState<User | null>(null);
 
   const resetForm = () => {
     setName('');
@@ -73,7 +75,8 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
-      alert('Por favor, preencha o nome do professor.');
+      setFeedbackMsg('Por favor, preencha o nome do professor.');
+      setTimeout(() => setFeedbackMsg(null), 4000);
       return;
     }
 
@@ -385,16 +388,9 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({
                 </button>
 
                 <button
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        `Deseja realmente remover o cadastro de "${teacher.name}"?`
-                      )
-                    ) {
-                      onDeleteTeacher(teacher.id);
-                    }
-                  }}
-                  className="p-1.5 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  type="button"
+                  onClick={() => setTeacherToDelete(teacher)}
+                  className="p-1.5 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
                   title="Excluir professor"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -404,6 +400,23 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({
           ))}
         </div>
       </div>
+
+      {/* Confirmation Modal for Teacher Deletion */}
+      <ConfirmDialog
+        isOpen={!!teacherToDelete}
+        title="Remover Professor(a)"
+        message={`Deseja realmente remover o cadastro de "${teacherToDelete?.name}"? Esta ação removerá o acesso do docente às turmas e fichas do sistema.`}
+        confirmText="Sim, Remover Professor"
+        cancelText="Cancelar"
+        variant="danger"
+        onConfirm={() => {
+          if (teacherToDelete) {
+            onDeleteTeacher(teacherToDelete.id);
+            setTeacherToDelete(null);
+          }
+        }}
+        onCancel={() => setTeacherToDelete(null)}
+      />
     </div>
   );
 };
