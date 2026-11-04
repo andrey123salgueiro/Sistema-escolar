@@ -36,6 +36,7 @@ import {
   saveQuestionDoc,
   deleteQuestionDoc,
   saveSectionDoc,
+  deleteSectionDoc,
   saveReportDoc,
   deleteReportDoc,
   saveClassDoc,
@@ -437,6 +438,38 @@ export default function App() {
     showToast(`Seção "${title}" criada com sucesso!`);
   };
 
+  const handleDeleteSection = async (sectionId: string) => {
+    const sectionToRemove = sections.find((s) => s.id === sectionId);
+    const updatedSections = sections.filter((s) => s.id !== sectionId);
+    setSections(updatedSections);
+    saveStoredSections(updatedSections);
+
+    // Also delete any questions belonging to this section
+    const questionsToRemove = questions.filter((q) => q.sectionId === sectionId);
+    const updatedQuestions = questions.filter((q) => q.sectionId !== sectionId);
+    if (questionsToRemove.length > 0) {
+      setQuestions(updatedQuestions);
+      saveStoredQuestions(updatedQuestions);
+    }
+
+    try {
+      await deleteSectionDoc(sectionId);
+      for (const q of questionsToRemove) {
+        await deleteQuestionDoc(q.id);
+      }
+      showToast(
+        `Seção "${sectionToRemove?.title || ''}" excluída com sucesso${
+          questionsToRemove.length > 0
+            ? ` (com ${questionsToRemove.length} ${questionsToRemove.length === 1 ? 'pergunta' : 'perguntas'})`
+            : ''
+        }.`
+      );
+    } catch (err) {
+      console.error('Error deleting section:', err);
+      showToast('Seção removida.');
+    }
+  };
+
   // Class Management actions
   const handleAddClass = async (newCls: SchoolClass) => {
     const updated = [...classes, newCls];
@@ -691,6 +724,7 @@ export default function App() {
                 onUpdateQuestion={handleUpdateQuestion}
                 onDeleteQuestion={handleDeleteQuestion}
                 onAddSection={handleAddSection}
+                onDeleteSection={handleDeleteSection}
               />
             )}
           </>

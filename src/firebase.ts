@@ -315,6 +315,15 @@ export async function saveSectionDoc(section: QuestionSection): Promise<void> {
   }
 }
 
+export async function deleteSectionDoc(sectionId: string): Promise<void> {
+  const path = `sections/${sectionId}`;
+  try {
+    await deleteDoc(doc(db, 'sections', sectionId));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, path);
+  }
+}
+
 export async function saveReportDoc(report: PreCouncilReport): Promise<void> {
   const path = `reports/${report.id}`;
   try {

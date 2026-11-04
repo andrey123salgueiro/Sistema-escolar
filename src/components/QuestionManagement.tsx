@@ -20,6 +20,7 @@ interface QuestionManagementProps {
   onUpdateQuestion: (question: Question) => void;
   onDeleteQuestion: (questionId: string) => void;
   onAddSection: (title: string) => void;
+  onDeleteSection?: (sectionId: string) => void;
 }
 
 export const QuestionManagement: React.FC<QuestionManagementProps> = ({
@@ -29,11 +30,13 @@ export const QuestionManagement: React.FC<QuestionManagementProps> = ({
   onUpdateQuestion,
   onDeleteQuestion,
   onAddSection,
+  onDeleteSection,
 }) => {
   const [showAddQuestion, setShowAddQuestion] = useState(false);
   const [showAddSection, setShowAddSection] = useState(false);
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
   const [questionToDelete, setQuestionToDelete] = useState<Question | null>(null);
+  const [sectionToDelete, setSectionToDelete] = useState<QuestionSection | null>(null);
 
   // Form states for question
   const [targetSectionId, setTargetSectionId] = useState<string>(
@@ -125,6 +128,9 @@ export const QuestionManagement: React.FC<QuestionManagementProps> = ({
   };
 
   const sortedSections = [...sections].sort((a, b) => a.order - b.order);
+  const questionsInSectionToDelete = sectionToDelete
+    ? questions.filter((q) => q.sectionId === sectionToDelete.id)
+    : [];
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
@@ -339,20 +345,35 @@ export const QuestionManagement: React.FC<QuestionManagementProps> = ({
                   </span>
                 </div>
 
-                <button
-                  onClick={() => {
-                    setTargetSectionId(sec.id);
-                    setEditingQuestionId(null);
-                    setPromptText('');
-                    setPlaceholderText('');
-                    setShowAddQuestion(true);
-                    scrollToForm();
-                  }}
-                  className="text-xs text-amber-700 hover:text-amber-800 font-semibold flex items-center gap-1"
-                >
-                  <PlusCircle className="w-3.5 h-3.5" />
-                  <span>Adicionar nesta seção</span>
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => {
+                      setTargetSectionId(sec.id);
+                      setEditingQuestionId(null);
+                      setPromptText('');
+                      setPlaceholderText('');
+                      setShowAddQuestion(true);
+                      scrollToForm();
+                    }}
+                    className="text-xs text-amber-700 hover:text-amber-800 font-semibold flex items-center gap-1 px-2.5 py-1.5 rounded-lg hover:bg-amber-100/60 transition-colors cursor-pointer"
+                    title={`Adicionar pergunta na seção "${sec.title}"`}
+                  >
+                    <PlusCircle className="w-3.5 h-3.5" />
+                    <span>Adicionar pergunta</span>
+                  </button>
+
+                  {onDeleteSection && (
+                    <button
+                      type="button"
+                      onClick={() => setSectionToDelete(sec)}
+                      className="p-1.5 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                      title={`Excluir seção "${sec.title}"`}
+                      aria-label={`Excluir seção "${sec.title}"`}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Questions in Section */}
@@ -435,6 +456,37 @@ export const QuestionManagement: React.FC<QuestionManagementProps> = ({
           }
         }}
         onCancel={() => setQuestionToDelete(null)}
+      />
+
+      {/* Confirmation Modal for Section Deletion */}
+      <ConfirmDialog
+        isOpen={!!sectionToDelete}
+        title={
+          questionsInSectionToDelete.length > 0
+            ? 'Excluir Seção com Perguntas'
+            : 'Excluir Seção'
+        }
+        message={
+          questionsInSectionToDelete.length > 0
+            ? `Atenção: A seção "${sectionToDelete?.title}" possui ${questionsInSectionToDelete.length} ${
+                questionsInSectionToDelete.length === 1 ? 'pergunta cadastrada' : 'perguntas cadastradas'
+              }. Se você excluir esta seção, todas as suas perguntas também serão excluídas do questionário oficial. Deseja excluir assim mesmo?`
+            : `Deseja realmente excluir a seção "${sectionToDelete?.title}"?`
+        }
+        confirmText={
+          questionsInSectionToDelete.length > 0
+            ? 'Sim, Excluir Seção e Perguntas'
+            : 'Sim, Excluir Seção'
+        }
+        cancelText="Cancelar"
+        variant="danger"
+        onConfirm={() => {
+          if (sectionToDelete && onDeleteSection) {
+            onDeleteSection(sectionToDelete.id);
+            setSectionToDelete(null);
+          }
+        }}
+        onCancel={() => setSectionToDelete(null)}
       />
     </div>
   );
