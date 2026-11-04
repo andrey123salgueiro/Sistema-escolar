@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Question, QuestionSection } from '../types';
 import {
   HelpCircle,
@@ -47,12 +47,23 @@ export const QuestionManagement: React.FC<QuestionManagementProps> = ({
   const [newSectionTitle, setNewSectionTitle] = useState('');
   const [feedback, setFeedback] = useState<string | null>(null);
 
+  const formRef = useRef<HTMLDivElement | null>(null);
+
   const resetQuestionForm = () => {
     setPromptText('');
     setPlaceholderText('');
     setIsRequired(true);
     setEditingQuestionId(null);
     setShowAddQuestion(false);
+  };
+
+  const scrollToForm = () => {
+    setTimeout(() => {
+      if (formRef.current) {
+        formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 50);
   };
 
   const handleEditClick = (q: Question) => {
@@ -62,7 +73,7 @@ export const QuestionManagement: React.FC<QuestionManagementProps> = ({
     setIsRequired(q.required);
     setEditingQuestionId(q.id);
     setShowAddQuestion(true);
-    window.scrollTo({ top: 120, behavior: 'smooth' });
+    scrollToForm();
   };
 
   const handleSaveQuestion = (e: React.FormEvent) => {
@@ -148,6 +159,7 @@ export const QuestionManagement: React.FC<QuestionManagementProps> = ({
               resetQuestionForm();
               setShowAddQuestion(true);
               setShowAddSection(false);
+              scrollToForm();
             }}
             className="flex items-center gap-2 px-4 py-2 bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all"
           >
@@ -203,7 +215,7 @@ export const QuestionManagement: React.FC<QuestionManagementProps> = ({
 
       {/* Question Form */}
       {showAddQuestion && (
-        <div className="bg-white rounded-2xl border-2 border-amber-300 p-6 mb-8 shadow-sm">
+        <div ref={formRef} className="bg-white rounded-2xl border-2 border-amber-300 p-6 mb-8 shadow-sm">
           <div className="flex items-center justify-between pb-3 mb-4 border-b border-stone-200">
             <h3 className="text-sm font-bold text-stone-900 flex items-center gap-2">
               <PlusCircle className="w-4 h-4 text-amber-700" />
@@ -334,6 +346,7 @@ export const QuestionManagement: React.FC<QuestionManagementProps> = ({
                     setPromptText('');
                     setPlaceholderText('');
                     setShowAddQuestion(true);
+                    scrollToForm();
                   }}
                   className="text-xs text-amber-700 hover:text-amber-800 font-semibold flex items-center gap-1"
                 >

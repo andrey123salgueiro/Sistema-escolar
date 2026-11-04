@@ -16,6 +16,8 @@ import {
   SCHOOL_NAME,
   SCHOOL_SUBTITLE,
   DEVELOPER_NAME,
+  DEVELOPER_MENTOR,
+  DEVELOPER_CLASS,
   DEVELOPER_EMAIL,
   SYSTEM_VERSION,
 } from '../data/initialData';
@@ -451,7 +453,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
 
           <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-slate-400">
             <span>
-              Desenvolvido por <strong className="text-amber-400">{DEVELOPER_NAME}</strong>
+              Desenvolvido por <strong className="text-amber-400">{DEVELOPER_NAME}</strong> · {DEVELOPER_MENTOR} · {DEVELOPER_CLASS}
             </span>
             <span className="text-slate-600" aria-hidden="true">·</span>
             <span className="text-slate-500">Versão {SYSTEM_VERSION}</span>

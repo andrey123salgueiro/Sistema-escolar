@@ -303,7 +303,7 @@ export const ReportForm: React.FC<ReportFormProps> = ({
         {activeReport && (
           <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 font-semibold">
             <Lock className="w-3.5 h-3.5 text-amber-700" />
-            <span>Ficha autorizada pela Direção: {classGroup} / {component}</span>
+            <span>Ficha autorizada pela Direção: {classGroup} • {bimester} • {component}</span>
           </div>
         )}
       </div>
@@ -413,26 +413,27 @@ export const ReportForm: React.FC<ReportFormProps> = ({
             <div>
               <label className="block text-xs font-semibold text-stone-700 mb-1 flex items-center gap-1.5">
                 <Layers className="w-3.5 h-3.5 text-stone-500" />
-                Turma:
+                Turma Definida:
               </label>
-              <select
-                value={classGroup}
-                onChange={(e) => setClassGroup(e.target.value)}
-                className="w-full bg-white border border-stone-300 rounded-lg px-3 py-2 text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 font-medium"
-              >
-                {AVAILABLE_CLASSES.map((cls) => (
-                  <option key={cls} value={cls}>
-                    {cls}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={classGroup}
+                  readOnly
+                  title="Turma autorizada e fixada pela Direção Escolar"
+                  className="w-full bg-stone-100 border border-stone-300 rounded-lg px-3 py-2 pr-14 text-xs text-stone-800 font-bold cursor-not-allowed select-none"
+                />
+                <span className="absolute right-2 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 text-[10px] font-semibold text-stone-500 bg-stone-200/90 px-1.5 py-0.5 rounded">
+                  <Lock className="w-2.5 h-2.5" /> Fixo
+                </span>
+              </div>
             </div>
 
             {/* Data & Bimestre */}
             <div>
               <label className="block text-xs font-semibold text-stone-700 mb-1 flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5 text-stone-500" />
-                Data & Período:
+                Data & Bimestre:
               </label>
               <div className="flex gap-2">
                 <input
@@ -441,16 +442,18 @@ export const ReportForm: React.FC<ReportFormProps> = ({
                   onChange={(e) => setDate(e.target.value)}
                   className="w-full bg-white border border-stone-300 rounded-lg px-2 py-2 text-xs text-stone-900 focus:ring-2 focus:ring-amber-500"
                 />
-                <select
-                  value={bimester}
-                  onChange={(e) => setBimester(e.target.value)}
-                  className="bg-white border border-stone-300 rounded-lg px-2 py-2 text-xs text-stone-900 focus:ring-2 focus:ring-amber-500 font-medium"
-                >
-                  <option value="1º Bimestre">1º Bim</option>
-                  <option value="2º Bimestre">2º Bim</option>
-                  <option value="3º Bimestre">3º Bim</option>
-                  <option value="4º Bimestre">4º Bim</option>
-                </select>
+                <div className="relative shrink-0 w-32">
+                  <input
+                    type="text"
+                    value={bimester}
+                    readOnly
+                    title="Bimestre autorizado e fixado pela Direção Escolar"
+                    className="w-full bg-stone-100 border border-stone-300 rounded-lg px-2 py-2 pr-12 text-xs text-stone-800 font-bold cursor-not-allowed select-none text-center"
+                  />
+                  <span className="absolute right-1.5 top-1/2 -translate-y-1/2 inline-flex items-center gap-0.5 text-[9px] font-semibold text-stone-500 bg-stone-200/90 px-1 py-0.5 rounded">
+                    <Lock className="w-2 h-2" /> Fixo
+                  </span>
+                </div>
               </div>
             </div>
           </div>

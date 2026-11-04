@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { User, SchoolClass } from '../types';
 import {
   AVAILABLE_CLASSES,
@@ -50,6 +50,8 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({
   const [feedbackMsg, setFeedbackMsg] = useState<string | null>(null);
   const [teacherToDelete, setTeacherToDelete] = useState<User | null>(null);
 
+  const formRef = useRef<HTMLDivElement | null>(null);
+
   const resetForm = () => {
     setName('');
     setEmail('');
@@ -60,6 +62,15 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({
     setShowForm(false);
   };
 
+  const scrollToForm = () => {
+    setTimeout(() => {
+      if (formRef.current) {
+        formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 50);
+  };
+
   const handleOpenEdit = (teacher: User) => {
     setName(teacher.name);
     setEmail(teacher.email);
@@ -68,6 +79,7 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({
     setSelectedClasses(teacher.classes || []);
     setEditingTeacherId(teacher.id);
     setShowForm(true);
+    scrollToForm();
   };
 
   const handleToggleClass = (cls: string) => {
@@ -159,6 +171,7 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({
             onClick={() => {
               resetForm();
               setShowForm(true);
+              scrollToForm();
             }}
             className="flex items-center gap-2 px-4 py-2.5 bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all shrink-0"
           >
@@ -177,7 +190,7 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({
 
       {/* Teacher Form (Add or Edit) */}
       {showForm && (
-        <div className="bg-white rounded-2xl border-2 border-amber-300 p-6 mb-8 shadow-sm">
+        <div ref={formRef} className="bg-white rounded-2xl border-2 border-amber-300 p-6 mb-8 shadow-sm">
           <div className="flex items-center justify-between pb-3 mb-4 border-b border-stone-200">
             <h3 className="text-sm font-bold text-stone-900 flex items-center gap-2">
               <UserPlus className="w-4 h-4 text-amber-700" />

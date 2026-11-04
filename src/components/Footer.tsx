@@ -12,6 +12,8 @@ import {
   SCHOOL_NAME,
   SCHOOL_SUBTITLE,
   DEVELOPER_NAME,
+  DEVELOPER_MENTOR,
+  DEVELOPER_CLASS,
   SYSTEM_VERSION,
   SYSTEM_YEAR,
 } from '../data/initialData';
@@ -75,8 +77,8 @@ export const Footer: React.FC<FooterProps> = ({
                   <h4 className="text-xs font-bold text-white tracking-tight">
                     {DEVELOPER_NAME}
                   </h4>
-                  <p className="text-[10px] text-slate-400">
-                    Criador e Administrador Técnico do Sistema
+                  <p className="text-[10px] text-slate-300 font-medium">
+                    {DEVELOPER_MENTOR} · {DEVELOPER_CLASS}
                   </p>
                 </div>
               </div>
@@ -130,7 +132,7 @@ export const Footer: React.FC<FooterProps> = ({
             </span>
             <span className="hidden sm:inline mx-1.5">·</span>
             <span className="text-slate-400">
-              Desenvolvido com excelência por <strong className="text-slate-200">{DEVELOPER_NAME}</strong>.
+              Desenvolvido por <strong className="text-slate-200">{DEVELOPER_NAME}</strong> · {DEVELOPER_MENTOR} · {DEVELOPER_CLASS}.
             </span>
           </div>
 

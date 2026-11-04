@@ -588,6 +588,7 @@ export default function App() {
           if (tab === 'new-form') {
             setEditingReport(null);
           }
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         onLogout={handleLogout}
         onResetData={handleResetData}
@@ -703,10 +704,12 @@ export default function App() {
                 onEditReport={(rep) => {
                   setEditingReport(rep);
                   setActiveTab('new-form');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 onFillReport={(rep) => {
                   setEditingReport(rep);
                   setActiveTab('new-form');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 onOpenReport={(rep) => setViewingReport(rep)}
                 onPrintReport={(rep) => setViewingReport(rep)}
@@ -714,6 +717,7 @@ export default function App() {
                 onStartNewReport={() => {
                   setEditingReport(null);
                   setActiveTab('new-form');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
               />
             )}

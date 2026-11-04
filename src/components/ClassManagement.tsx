@@ -66,6 +66,7 @@ export const ClassManagement: React.FC<ClassManagementProps> = ({
     setEditingClassId(cls.id);
     setFormError(null);
     setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSubmit = (e: React.FormEvent) => {

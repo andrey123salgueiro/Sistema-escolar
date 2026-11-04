@@ -14,7 +14,11 @@ export const REPORT_TITLE = 'FICHA INDIVIDUAL DE PRÉ-CONSELHO DE CLASSE';
 
 // Informações Oficiais de Desenvolvimento e Instituição
 export const DEVELOPER_NAME = 'Andrey Salgueiro';
+export const DEVELOPER_MENTOR = 'Professor Robson';
+export const DEVELOPER_CLASS = '3º A Técnico em Desenvolvimento de Sistemas';
 export const DEVELOPER_EMAIL = 'andreysalgueiro95@gmail.com';
+export const DEVELOPER_WHATSAPP = '5543996025004'; // Número com DDI e DDD para wa.me
+export const DEVELOPER_WHATSAPP_DISPLAY = '(43) 99602-5004'; // Formato amigável de exibição
 export const SYSTEM_VERSION = '1.0.0 Oficial';
 export const SYSTEM_YEAR = '2026';
 // Brasão Oficial da Escola Estadual do Campo Frei Graciano Droessler

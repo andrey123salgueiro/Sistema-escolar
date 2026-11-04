@@ -68,9 +68,10 @@ export const StudentManagement: React.FC<StudentManagementProps> = ({
   const [importTargetClass, setImportTargetClass] = useState<string>(
     classes[0]?.name || '6º Ano A'
   );
-  const [useSheetClass, setUseSheetClass] = useState(true);
   const [importFileName, setImportFileName] = useState<string | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
+
+  const manualFormRef = useRef<HTMLDivElement | null>(null);
 
   const resetManualForm = () => {
     setName('');
@@ -82,6 +83,15 @@ export const StudentManagement: React.FC<StudentManagementProps> = ({
     setShowManualForm(false);
   };
 
+  const scrollToManualForm = () => {
+    setTimeout(() => {
+      if (manualFormRef.current) {
+        manualFormRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 50);
+  };
+
   const handleOpenEdit = (std: Student) => {
     setName(std.name);
     setRollNumber(std.rollNumber || '');
@@ -90,6 +100,7 @@ export const StudentManagement: React.FC<StudentManagementProps> = ({
     setNotes(std.notes || '');
     setEditingStudentId(std.id);
     setShowManualForm(true);
+    scrollToManualForm();
   };
 
   const handleManualSubmit = (e: React.FormEvent) => {
@@ -247,7 +258,7 @@ export const StudentManagement: React.FC<StudentManagementProps> = ({
       id: `std-imp-${Date.now()}-${idx}`,
       name: item.name,
       rollNumber: item.rollNumber,
-      classGroup: useSheetClass && item.classGroup ? item.classGroup : importTargetClass,
+      classGroup: importTargetClass,
       status: 'ativo',
       notes: item.notes,
       createdAt: new Date().toISOString(),
@@ -366,6 +377,9 @@ export const StudentManagement: React.FC<StudentManagementProps> = ({
               setImportError(null);
               setImportedPreview([]);
               setImportFileName(null);
+              if (selectedClass !== 'all') {
+                setImportTargetClass(selectedClass);
+              }
               setShowImportModal(true);
             }}
             id="btn-open-excel-import"
@@ -379,6 +393,7 @@ export const StudentManagement: React.FC<StudentManagementProps> = ({
             onClick={() => {
               resetManualForm();
               setShowManualForm(true);
+              scrollToManualForm();
             }}
             id="btn-add-student-manual"
             className="flex items-center gap-1.5 px-3.5 py-2 bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold rounded-xl shadow-xs transition-colors"
@@ -398,7 +413,7 @@ export const StudentManagement: React.FC<StudentManagementProps> = ({
 
       {/* Manual Student Form (Add or Edit) */}
       {showManualForm && (
-        <div className="bg-white rounded-2xl border-2 border-amber-300 p-6 mb-8 shadow-sm">
+        <div ref={manualFormRef} className="bg-white rounded-2xl border-2 border-amber-300 p-6 mb-8 shadow-sm">
           <div className="flex items-center justify-between pb-3 mb-4 border-b border-stone-200">
             <h3 className="text-sm font-bold text-stone-900 flex items-center gap-2">
               <UserPlus className="w-4 h-4 text-amber-700" />
@@ -565,50 +580,26 @@ export const StudentManagement: React.FC<StudentManagementProps> = ({
               </div>
 
               {/* Destination Class Settings */}
-              <div className="bg-stone-50 p-4 rounded-xl border border-stone-200 space-y-3">
-                <h4 className="text-xs font-bold text-stone-800">
-                  Configuração da Turma de Destino:
-                </h4>
-
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <label className="flex items-center gap-2 text-xs cursor-pointer">
-                    <input
-                      type="radio"
-                      name="classConfig"
-                      checked={useSheetClass}
-                      onChange={() => setUseSheetClass(true)}
-                      className="text-emerald-600 focus:ring-emerald-500"
-                    />
-                    <span>Utilizar a turma informada na própria planilha</span>
-                  </label>
-
-                  <label className="flex items-center gap-2 text-xs cursor-pointer">
-                    <input
-                      type="radio"
-                      name="classConfig"
-                      checked={!useSheetClass}
-                      onChange={() => setUseSheetClass(false)}
-                      className="text-emerald-600 focus:ring-emerald-500"
-                    />
-                    <span>Atribuir todos os alunos a uma turma específica:</span>
-                  </label>
+              <div className="bg-stone-50 p-4 rounded-xl border border-stone-200 space-y-2">
+                <label className="block text-xs font-bold text-stone-800">
+                  Atribuir todos os alunos a uma turma específica:
+                </label>
+                <div className="pt-1">
+                  <select
+                    value={importTargetClass}
+                    onChange={(e) => setImportTargetClass(e.target.value)}
+                    className="w-full sm:w-72 bg-white border border-stone-300 rounded-lg px-3 py-2 text-xs font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  >
+                    {classes.map((c) => (
+                      <option key={c.id} value={c.name}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-
-                {!useSheetClass && (
-                  <div className="pt-2">
-                    <select
-                      value={importTargetClass}
-                      onChange={(e) => setImportTargetClass(e.target.value)}
-                      className="w-full sm:w-60 bg-white border border-stone-300 rounded-lg px-3 py-1.5 text-xs text-stone-800"
-                    >
-                      {classes.map((c) => (
-                        <option key={c.id} value={c.name}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
+                <p className="text-[11px] text-stone-500">
+                  Todos os estudantes identificados na planilha serão cadastrados na turma selecionada acima.
+                </p>
               </div>
 
               {/* Preview Table */}
@@ -633,8 +624,8 @@ export const StudentManagement: React.FC<StudentManagementProps> = ({
                           </span>
                           <span className="font-semibold text-stone-900">{item.name}</span>
                         </div>
-                        <span className="text-[11px] px-2 py-0.5 rounded bg-stone-100 font-medium text-stone-700">
-                          {useSheetClass && item.classGroup ? item.classGroup : importTargetClass}
+                        <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-200 font-semibold text-amber-800">
+                          {importTargetClass}
                         </span>
                       </div>
                     ))}
