@@ -286,6 +286,21 @@ export const ClassManagement: React.FC<ClassManagementProps> = ({
         </div>
 
         {/* Classes Grid */}
+        {filteredClasses.length === 0 ? (
+          <div className="p-12 text-center text-stone-500">
+            <Layers className="w-10 h-10 text-stone-300 mx-auto mb-2" />
+            <p className="text-sm font-semibold text-stone-700">
+              {searchTerm.trim()
+                ? 'Nenhuma turma encontrada para a busca'
+                : 'Nenhuma turma cadastrada'}
+            </p>
+            <p className="text-xs text-stone-400 mt-1">
+              {searchTerm.trim()
+                ? 'Tente buscar por outro nome ou turno.'
+                : 'Clique em "+ Cadastrar Nova Turma" acima para criar a primeira turma.'}
+            </p>
+          </div>
+        ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
           {filteredClasses.map((cls) => {
             const classStudents = students.filter((s) => s.classGroup === cls.name);
@@ -367,6 +382,7 @@ export const ClassManagement: React.FC<ClassManagementProps> = ({
             );
           })}
         </div>
+        )}
       </div>
 
       {/* Confirmation Modal for Class Deletion */}

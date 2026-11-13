@@ -32,15 +32,15 @@ export function getStoredUsers(): User[] {
     }
     const parsed: User[] = JSON.parse(raw);
     let hasChanges = false;
-    // Ensure all users have passwords populated and diretora has username admin
+    // Ensure all users have passwords populated and diretora has default username fallback
     const fixed = parsed.map((u) => {
-      let updatedUser = { ...u };
+      const updatedUser = { ...u };
       if (u.role === 'diretora') {
-        if (updatedUser.username !== 'admin') {
+        if (!updatedUser.username) {
           updatedUser.username = 'admin';
           hasChanges = true;
         }
-        if (updatedUser.password !== '123') {
+        if (!updatedUser.password) {
           updatedUser.password = '123';
           hasChanges = true;
         }

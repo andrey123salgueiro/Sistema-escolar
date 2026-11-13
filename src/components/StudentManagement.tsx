@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Student, SchoolClass } from '../types';
 import * as XLSX from 'xlsx';
 import {
@@ -73,10 +73,24 @@ export const StudentManagement: React.FC<StudentManagementProps> = ({
 
   const manualFormRef = useRef<HTMLDivElement | null>(null);
 
+  useEffect(() => {
+    if (classes.length === 0) {
+      if (!editingStudentId) setClassGroup('');
+      setImportTargetClass('');
+      return;
+    }
+    if (!classes.some((c) => c.name === importTargetClass)) {
+      setImportTargetClass(classes[0].name);
+    }
+    if (!editingStudentId && !classes.some((c) => c.name === classGroup)) {
+      setClassGroup(classes[0].name);
+    }
+  }, [classes, editingStudentId, importTargetClass, classGroup]);
+
   const resetManualForm = () => {
     setName('');
     setRollNumber('');
-    setClassGroup(selectedClass !== 'all' ? selectedClass : classes[0]?.name || '6º Ano A');
+    setClassGroup(selectedClass !== 'all' ? selectedClass : classes[0]?.name || '');
     setStatus('ativo');
     setNotes('');
     setEditingStudentId(null);
@@ -465,11 +479,15 @@ export const StudentManagement: React.FC<StudentManagementProps> = ({
                   onChange={(e) => setClassGroup(e.target.value)}
                   className="w-full bg-stone-50 border border-stone-300 rounded-lg px-3 py-2 text-xs text-stone-900 focus:bg-white focus:ring-2 focus:ring-amber-500 font-semibold"
                 >
-                  {classes.map((c) => (
-                    <option key={c.id} value={c.name}>
-                      {c.name}
-                    </option>
-                  ))}
+                  {classes.length === 0 ? (
+                    <option value="">Sem turma cadastrada</option>
+                  ) : (
+                    classes.map((c) => (
+                      <option key={c.id} value={c.name}>
+                        {c.name}
+                      </option>
+                    ))
+                  )}
                 </select>
               </div>
             </div>
@@ -590,11 +608,15 @@ export const StudentManagement: React.FC<StudentManagementProps> = ({
                     onChange={(e) => setImportTargetClass(e.target.value)}
                     className="w-full sm:w-72 bg-white border border-stone-300 rounded-lg px-3 py-2 text-xs font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
                   >
-                    {classes.map((c) => (
-                      <option key={c.id} value={c.name}>
-                        {c.name}
-                      </option>
-                    ))}
+                    {classes.length === 0 ? (
+                      <option value="">Sem turma cadastrada</option>
+                    ) : (
+                      classes.map((c) => (
+                        <option key={c.id} value={c.name}>
+                          {c.name}
+                        </option>
+                      ))
+                    )}
                   </select>
                 </div>
                 <p className="text-[11px] text-stone-500">

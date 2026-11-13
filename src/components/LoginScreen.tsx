@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User } from '../types';
 import { Logo } from './Logo';
 import {
@@ -53,6 +53,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
 
   // Fields for Director Login
   const [diretoraInput, setDiretoraInput] = useState('admin');
+  const [hasEditedDiretoraInput, setHasEditedDiretoraInput] = useState(false);
   const [diretoraPassword, setDiretoraPassword] = useState('');
   const [showDiretoraPassword, setShowDiretoraPassword] = useState(false);
 
@@ -61,6 +62,20 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
 
   const diretoraUser = users.find((u) => u.role === 'diretora');
   const teacherUsers = users.filter((u) => u.role === 'professor');
+
+  const usesDefaultAdminCreds =
+    (diretoraUser?.username || 'admin').toLowerCase() === 'admin' &&
+    (diretoraUser?.password || '123') === '123';
+
+  useEffect(() => {
+    if (
+      !hasEditedDiretoraInput &&
+      diretoraUser?.username &&
+      diretoraUser.username.trim().toLowerCase() !== 'admin'
+    ) {
+      setDiretoraInput('');
+    }
+  }, [diretoraUser?.username, hasEditedDiretoraInput]);
 
   // Handle Teacher Submit
   const handleTeacherSubmit = (e: React.FormEvent) => {
@@ -82,7 +97,13 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
 
     const normInput = normalize(rawInput);
 
-    if (normInput === 'admin' || normInput === 'diretoria@escola.gov.br') {
+    const adminUsername = normalize(diretoraUser?.username || 'admin');
+    const adminEmail = normalize(diretoraUser?.email || 'diretoria@escola.gov.br');
+    if (
+      normInput === adminUsername ||
+      normInput === adminEmail ||
+      normInput === 'diretoria@escola.gov.br'
+    ) {
       setErrorMessage(
         'Este usuário pertence à Direção. Por favor, acesse através da aba Acesso da Diretoria.'
       );
@@ -139,17 +160,19 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
     const cleanPass = diretoraPassword.trim();
 
     if (!cleanInput) {
-      setErrorMessage('Por favor, informe o usuário da Diretora (padrão: admin).');
+      setErrorMessage('Por favor, informe o usuário ou e-mail da Diretoria.');
       return;
     }
 
     if (!cleanPass) {
-      setErrorMessage('Por favor, digite a senha da Diretora (padrão: 123).');
+      setErrorMessage('Por favor, digite a senha da Diretoria.');
       return;
     }
 
     const isTeacher = teacherUsers.some(
-      (t) => normalize(t.name) === normalize(cleanInput)
+      (t) =>
+        normalize(t.name) === normalize(cleanInput) ||
+        normalize(t.username || '') === normalize(cleanInput)
     );
 
     if (isTeacher) {
@@ -159,22 +182,25 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
       return;
     }
 
-    if (
-      cleanInput !== 'admin' &&
-      cleanInput !== 'diretoria@escola.gov.br' &&
-      diretoraUser &&
-      diretoraUser.email.toLowerCase() !== cleanInput &&
-      normalize(diretoraUser.name) !== normalize(cleanInput)
-    ) {
+    const expectedUsername = (diretoraUser?.username || 'admin').trim().toLowerCase();
+    const expectedEmail = (diretoraUser?.email || 'diretoria@escola.gov.br').trim().toLowerCase();
+    const expectedName = diretoraUser ? normalize(diretoraUser.name) : '';
+
+    const matchesDirector =
+      cleanInput === expectedUsername ||
+      cleanInput === expectedEmail ||
+      (expectedName !== '' && normalize(cleanInput) === expectedName);
+
+    if (!matchesDirector) {
       setErrorMessage(
-        'Usuário da Diretoria inválido. O usuário oficial da Diretora é "admin".'
+        'Usuário da Diretoria inválido. Verifique o usuário ou e-mail cadastrado.'
       );
       return;
     }
 
     const expectedPass = diretoraUser?.password || '123';
-    if (cleanPass !== expectedPass && cleanPass !== '123') {
-      setErrorMessage('Senha incorreta para a Diretora. A senha padrão é 123.');
+    if (cleanPass !== expectedPass) {
+      setErrorMessage('Senha incorreta para a Diretoria.');
       return;
     }
 
@@ -370,10 +396,16 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                 <div className="mb-4 bg-slate-50 border border-slate-200 rounded-xl p-3 text-slate-700 text-xs">
                   <div className="flex items-center gap-2 font-medium mb-1">
                     <CheckCircle2 className="w-3.5 h-3.5 text-slate-800 shrink-0" />
-                    <span>Credenciais da Direção:</span>
+                    <span>
+                      {usesDefaultAdminCreds
+                        ? 'Credenciais iniciais padrão:'
+                        : 'Acesso da Direção:'}
+                    </span>
                   </div>
                   <p className="text-[11px] text-slate-600 ml-5 font-mono">
-                    Usuário: <strong>admin</strong> | Senha: <strong>123</strong>
+                    {usesDefaultAdminCreds
+                      ? <>Usuário: <strong>admin</strong> | Senha: <strong>123</strong></>
+                      : 'Informe o usuário (ou e-mail) e a senha configurados no perfil.'}
                   </p>
                 </div>
 
@@ -381,7 +413,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                   {/* Director Username */}
                   <div>
                     <label className="block text-xs font-medium text-slate-700 mb-1">
-                      Usuário da Diretora
+                      Usuário ou E-mail da Diretoria
                     </label>
                     <div className="relative">
                       <UserIcon className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -389,9 +421,12 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                         type="text"
                         required
                         id="input-diretora-user"
-                        placeholder="admin"
+                        placeholder={usesDefaultAdminCreds ? 'admin' : 'Digite seu usuário ou e-mail'}
                         value={diretoraInput}
-                        onChange={(e) => setDiretoraInput(e.target.value)}
+                        onChange={(e) => {
+                          setHasEditedDiretoraInput(true);
+                          setDiretoraInput(e.target.value);
+                        }}
                         className="w-full pl-9 pr-3 py-2.5 bg-slate-50/50 border border-slate-300 rounded-xl text-xs text-slate-900 focus:bg-white focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-all font-mono font-medium"
                       />
                     </div>
@@ -408,7 +443,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                         type={showDiretoraPassword ? 'text' : 'password'}
                         required
                         id="input-diretora-password"
-                        placeholder="123"
+                        placeholder={usesDefaultAdminCreds ? '123' : 'Digite sua senha'}
                         value={diretoraPassword}
                         onChange={(e) => setDiretoraPassword(e.target.value)}
                         className="w-full pl-9 pr-10 py-2.5 bg-slate-50/50 border border-slate-300 rounded-xl text-xs text-slate-900 focus:bg-white focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-all font-mono"

@@ -44,6 +44,7 @@ import {
   saveStudentDoc,
   batchSaveStudents,
   deleteStudentDoc,
+  markAllCollectionsSeeded,
 } from './firebase';
 import {
   INITIAL_USERS,
@@ -69,6 +70,7 @@ import { StudentManagement } from './components/StudentManagement';
 import { ClassPanorama } from './components/ClassPanorama';
 import { ClassPerformance } from './components/ClassPerformance';
 import { ReportViewModal } from './components/ReportViewModal';
+import { AdminProfileModal } from './components/AdminProfileModal';
 import { CheckCircle2 } from 'lucide-react';
 
 export default function App() {
@@ -98,6 +100,9 @@ export default function App() {
 
   // Contact Modal State
   const [isContactModalOpen, setIsContactModalOpen] = useState<boolean>(false);
+
+  // Admin Profile Modal State
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
 
   // Navigation tab
   const [activeTab, setActiveTab] = useState<string>('archive');
@@ -159,6 +164,15 @@ export default function App() {
       }));
       setUsers(sanitizedUsers);
       saveStoredUsers(sanitizedUsers);
+      setCurrentUserState((prev) => {
+        if (!prev) return null;
+        const updatedSelf = sanitizedUsers.find((u) => u.id === prev.id);
+        if (updatedSelf) {
+          persistCurrentUser(updatedSelf);
+          return updatedSelf;
+        }
+        return prev;
+      });
       setIsCloudSynced(true);
     });
 
@@ -240,6 +254,7 @@ export default function App() {
     setViewingReport(null);
 
     // Reseed cloud database
+    await markAllCollectionsSeeded();
     for (const u of INITIAL_USERS) await saveUserDoc(u);
     for (const q of INITIAL_QUESTIONS) await saveQuestionDoc(q);
     for (const s of INITIAL_SECTIONS) await saveSectionDoc(s);
@@ -400,6 +415,17 @@ export default function App() {
     showToast('Professor removido do quadro docente.');
   };
 
+  // Admin self-profile update
+  const handleUpdateAdminProfile = async (updatedAdmin: User) => {
+    const updated = users.map((u) => (u.id === updatedAdmin.id ? updatedAdmin : u));
+    setUsers(updated);
+    saveStoredUsers(updated);
+    setCurrentUserState(updatedAdmin);
+    persistCurrentUser(updatedAdmin);
+    await saveUserDoc(updatedAdmin);
+    showToast('Seus dados de acesso e perfil foram atualizados e salvos na nuvem!');
+  };
+
   // Question management actions
   const handleAddQuestion = async (newQuestion: Question) => {
     const updated = [...questions, newQuestion];
@@ -472,75 +498,94 @@ export default function App() {
 
   // Class Management actions
   const handleAddClass = async (newCls: SchoolClass) => {
-    const updated = [...classes, newCls];
-    setClasses(updated);
-    saveStoredClasses(updated);
+    setClasses((prev) => {
+      const updated = [...prev, newCls];
+      saveStoredClasses(updated);
+      return updated;
+    });
     try {
       await saveClassDoc(newCls);
       showToast(`Turma ${newCls.name} cadastrada e salva na nuvem!`);
     } catch (err) {
       console.error('Error saving class to Firestore:', err);
-      showToast(`Turma ${newCls.name} cadastrada com sucesso!`);
+      showToast('Erro ao salvar turma na nuvem. Verifique a conexão.');
     }
   };
 
   const handleUpdateClass = async (cls: SchoolClass) => {
-    const updated = classes.map((c) => (c.id === cls.id ? cls : c));
-    setClasses(updated);
-    saveStoredClasses(updated);
+    setClasses((prev) => {
+      const updated = prev.map((c) => (c.id === cls.id ? cls : c));
+      saveStoredClasses(updated);
+      return updated;
+    });
     try {
       await saveClassDoc(cls);
       showToast('Turma atualizada com sucesso.');
     } catch (err) {
       console.error('Error updating class in Firestore:', err);
-      showToast('Turma atualizada.');
+      showToast('Erro ao atualizar turma na nuvem. Verifique a conexão.');
     }
   };
 
   const handleDeleteClass = async (classId: string) => {
-    const updated = classes.filter((c) => c.id !== classId);
-    setClasses(updated);
-    saveStoredClasses(updated);
+    setClasses((prev) => {
+      const updated = prev.filter((c) => c.id !== classId);
+      saveStoredClasses(updated);
+      return updated;
+    });
     try {
       await deleteClassDoc(classId);
       showToast('Turma removida com sucesso.');
     } catch (err) {
       console.error('Error deleting class in Firestore:', err);
-      showToast('Turma removida.');
+      showToast('Erro ao remover turma na nuvem. Verifique a conexão.');
     }
   };
 
   // Student Management actions
   const handleAddStudent = async (newStudent: Student) => {
-    const updated = [newStudent, ...students];
-    setStudents(updated);
-    saveStoredStudents(updated);
+    setStudents((prev) => {
+      const updated = [newStudent, ...prev];
+      saveStoredStudents(updated);
+      return updated;
+    });
     await saveStudentDoc(newStudent);
     showToast(`Aluno ${newStudent.name} registrado e salvo na nuvem!`);
   };
 
   const handleAddMultipleStudents = async (newStudents: Student[]) => {
-    const updated = [...newStudents, ...students];
-    setStudents(updated);
-    saveStoredStudents(updated);
+    setStudents((prev) => {
+      const updated = [...newStudents, ...prev];
+      saveStoredStudents(updated);
+      return updated;
+    });
     await batchSaveStudents(newStudents);
     showToast(`${newStudents.length} alunos importados e sincronizados em nuvem!`);
   };
 
   const handleUpdateStudent = async (std: Student) => {
-    const updated = students.map((s) => (s.id === std.id ? std : s));
-    setStudents(updated);
-    saveStoredStudents(updated);
+    setStudents((prev) => {
+      const updated = prev.map((s) => (s.id === std.id ? std : s));
+      saveStoredStudents(updated);
+      return updated;
+    });
     await saveStudentDoc(std);
     showToast('Dados do estudante atualizados na nuvem.');
   };
 
   const handleDeleteStudent = async (studentId: string) => {
-    const updated = students.filter((s) => s.id !== studentId);
-    setStudents(updated);
-    saveStoredStudents(updated);
-    await deleteStudentDoc(studentId);
-    showToast('Estudante removido com sucesso.');
+    setStudents((prev) => {
+      const updated = prev.filter((s) => s.id !== studentId);
+      saveStoredStudents(updated);
+      return updated;
+    });
+    try {
+      await deleteStudentDoc(studentId);
+      showToast('Estudante removido com sucesso.');
+    } catch (err) {
+      console.error('Error deleting student in Firestore:', err);
+      showToast('Erro ao remover estudante na nuvem. Verifique a conexão.');
+    }
   };
 
   // Release and dispatch management actions (Disponibilizar Fichas)
@@ -616,6 +661,7 @@ export default function App() {
         isCloudSynced={isCloudSynced}
         schoolLogoUrl={schoolLogoUrl}
         onOpenContact={() => setIsContactModalOpen(true)}
+        onOpenProfile={() => setIsProfileModalOpen(true)}
         onSelectTab={(tab) => {
           setActiveTab(tab);
           if (tab === 'new-form') {
@@ -825,6 +871,17 @@ export default function App() {
           schoolLogoUrl={schoolLogoUrl}
           onClose={() => setViewingReport(null)}
           onSignReport={handleSignReportFromModal}
+        />
+      )}
+
+      {/* Admin Self-Edit Profile Modal */}
+      {isDiretora && (
+        <AdminProfileModal
+          isOpen={isProfileModalOpen}
+          onClose={() => setIsProfileModalOpen(false)}
+          currentUser={currentUser}
+          allUsers={users}
+          onSaveProfile={handleUpdateAdminProfile}
         />
       )}
     </div>
