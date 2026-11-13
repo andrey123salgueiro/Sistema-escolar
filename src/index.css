@@ -28,4 +28,11 @@
     break-inside: avoid;
     page-break-inside: avoid;
   }
+
+  .print-expand-list {
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+    padding-right: 0 !important;
+  }
 }

@@ -450,7 +450,7 @@ export const ClassPerformance: React.FC<ClassPerformanceProps> = ({
                 Nenhum estudante com conceito crítico registrado no período.
               </p>
             ) : (
-              <div className="space-y-2 max-h-60 overflow-y-auto pr-1 print:max-h-none print:overflow-visible print:pr-0">
+              <div className="space-y-2 max-h-60 overflow-y-auto pr-1 print:max-h-none print:overflow-visible print:pr-0 print-expand-list">
                 {studentsNeedingAttention.map((s, idx) => (
                   <div key={idx} className="bg-white border border-rose-200 rounded-lg p-2.5 text-xs page-break-inside-avoid">
                     <div className="flex items-center justify-between mb-1">
@@ -497,7 +497,7 @@ export const ClassPerformance: React.FC<ClassPerformanceProps> = ({
                 Nenhum estudante destaque isolado no filtro selecionado.
               </p>
             ) : (
-              <div className="space-y-2 max-h-60 overflow-y-auto pr-1 print:max-h-none print:overflow-visible print:pr-0">
+              <div className="space-y-2 max-h-60 overflow-y-auto pr-1 print:max-h-none print:overflow-visible print:pr-0 print-expand-list">
                 {standoutStudents.map((s, idx) => (
                   <div key={idx} className="bg-white border border-emerald-200 rounded-lg p-2.5 text-xs page-break-inside-avoid">
                     <div className="flex items-center justify-between mb-1">
