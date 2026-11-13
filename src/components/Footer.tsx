@@ -29,7 +29,7 @@ export const Footer: React.FC<FooterProps> = ({
   schoolLogoUrl,
 }) => {
   return (
-    <footer className="mt-8 bg-slate-950 text-slate-300 border-t border-slate-800 font-sans">
+    <footer className="mt-8 bg-slate-950 text-slate-300 border-t border-slate-800 font-sans print:hidden">
       {/* Top Accent Ribbon */}
       <div className="h-0.5 bg-gradient-to-r from-amber-500 via-blue-600 to-amber-500" />
 

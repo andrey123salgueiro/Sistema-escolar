@@ -318,6 +318,13 @@ export function subscribeQuestions(callback: (questions: Question[]) => void): U
   );
 }
 
+function normalizeTrimesterLabel(val?: string): string {
+  if (val === '1º Bimestre') return '1º Trimestre';
+  if (val === '2º Bimestre') return '2º Trimestre';
+  if (val === '3º Bimestre') return '3º Trimestre';
+  return val || '1º Trimestre';
+}
+
 export function subscribeReports(callback: (reports: PreCouncilReport[]) => void): Unsubscribe {
   const path = 'reports';
   return onSnapshot(
@@ -327,7 +334,14 @@ export function subscribeReports(callback: (reports: PreCouncilReport[]) => void
         void handleEmptyCollectionSnapshot('reports', path, INITIAL_REPORTS, callback);
       } else {
         void markCollectionSeeded('reports');
-        const reports = snapshot.docs.map((d) => ({ ...d.data(), id: d.id } as PreCouncilReport));
+        const reports = snapshot.docs.map((d) => {
+          const data = d.data() as PreCouncilReport;
+          return {
+            ...data,
+            id: d.id,
+            bimester: normalizeTrimesterLabel(data.bimester),
+          };
+        });
         callback(reports);
       }
     },

@@ -109,6 +109,7 @@ export default function App() {
 
   // Selected report for viewing in modal / printing
   const [viewingReport, setViewingReport] = useState<PreCouncilReport | null>(null);
+  const [autoPrintModal, setAutoPrintModal] = useState<boolean>(false);
 
   // Selected report for editing (draft)
   const [editingReport, setEditingReport] = useState<PreCouncilReport | null>(null);
@@ -645,10 +646,10 @@ export default function App() {
   const onlyTeachers = users.filter((u) => u.role === 'professor');
 
   return (
-    <div className="min-h-screen bg-stone-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-stone-100 flex flex-col font-sans print:block print:min-h-0 print:bg-white">
       {/* Toast notification banner */}
       {toastMessage && (
-        <div className="fixed top-4 right-4 z-50 bg-stone-900 text-stone-50 border border-stone-700 px-4 py-3 rounded-xl shadow-lg flex items-center gap-2.5 text-xs max-w-md animate-fade-in">
+        <div className="fixed top-4 right-4 z-50 bg-stone-900 text-stone-50 border border-stone-700 px-4 py-3 rounded-xl shadow-lg flex items-center gap-2.5 text-xs max-w-md animate-fade-in print:hidden">
           <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
           <span>{toastMessage}</span>
         </div>
@@ -674,7 +675,7 @@ export default function App() {
       />
 
       {/* Main Content Body */}
-      <main className="flex-1 pb-16">
+      <main className={`flex-1 pb-16 print:pb-0 ${viewingReport ? 'print:hidden' : ''}`}>
         {isDiretora ? (
           /* DIREÇÃO / COORDENAÇÃO VIEWS */
           <>
@@ -682,10 +683,13 @@ export default function App() {
               <DirectorDashboard
                 reports={reports}
                 teachers={onlyTeachers}
-                onOpenReport={(rep) => setViewingReport(rep)}
-                onPrintReport={(rep) => {
+                onOpenReport={(rep) => {
+                  setAutoPrintModal(false);
                   setViewingReport(rep);
-                  setTimeout(() => window.print(), 300);
+                }}
+                onPrintReport={(rep) => {
+                  setAutoPrintModal(true);
+                  setViewingReport(rep);
                 }}
                 onDeleteReport={handleDeleteReport}
                 onQuickSign={handleQuickSign}
@@ -791,8 +795,14 @@ export default function App() {
                   setActiveTab('new-form');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                onOpenReport={(rep) => setViewingReport(rep)}
-                onPrintReport={(rep) => setViewingReport(rep)}
+                onOpenReport={(rep) => {
+                  setAutoPrintModal(false);
+                  setViewingReport(rep);
+                }}
+                onPrintReport={(rep) => {
+                  setAutoPrintModal(true);
+                  setViewingReport(rep);
+                }}
                 onDeleteReport={handleDeleteReport}
                 onStartNewReport={() => {
                   setEditingReport(null);
@@ -869,7 +879,12 @@ export default function App() {
           sections={sections}
           currentUser={currentUser}
           schoolLogoUrl={schoolLogoUrl}
-          onClose={() => setViewingReport(null)}
+          autoPrint={autoPrintModal}
+          onAutoPrintDone={() => setAutoPrintModal(false)}
+          onClose={() => {
+            setAutoPrintModal(false);
+            setViewingReport(null);
+          }}
           onSignReport={handleSignReportFromModal}
         />
       )}

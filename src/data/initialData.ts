@@ -239,6 +239,12 @@ export const AVAILABLE_CLASSES = [
   '3º Ano EM',
 ];
 
+export const AVAILABLE_TRIMESTERS = [
+  '1º Trimestre',
+  '2º Trimestre',
+  '3º Trimestre',
+];
+
 export const AVAILABLE_SUBJECTS = [
   'Língua Portuguesa',
   'Matemática',
@@ -264,7 +270,7 @@ export const INITIAL_REPORTS: PreCouncilReport[] = [
     component: 'Matemática',
     classGroup: '6º Ano A',
     date: '2026-09-14',
-    bimester: '3º Bimestre',
+    bimester: '3º Trimestre',
     status: 'visto',
     createdAt: '2026-09-14T10:30:00Z',
     updatedAt: '2026-09-15T14:20:00Z',
@@ -272,7 +278,7 @@ export const INITIAL_REPORTS: PreCouncilReport[] = [
       'q-1': 'O desenvolvimento geral é satisfatório. Cerca de 75% dos estudantes atingiram os objetivos de aprendizagem propostos para cálculo mental e resolução de situações-problema.',
       'q-2': 'Turma muito participativa e interessada, com boa postura na realização das atividades individuais e colaborativas.',
       'q-3': 'Maior dificuldade no conteúdo de frações equivalentes e raciocínio lógico envolvendo grandezas proporcionais.',
-      'q-4': 'O estudante Marcos Vinicius apresentou 8 faltas no bimestre sem justificativa formal. Família já notificada.',
+      'q-4': 'O estudante Marcos Vinicius apresentou 8 faltas no trimestre sem justificativa formal. Família já notificada.',
       'q-5': 'Beatriz Silva e Lucas Gabriel destacaram-se pelo protagonismo e auxílio aos colegas nas atividades em duplas.',
       'q-6': 'Guilherme Henrique e Larissa necessitam de apoio pedagógico contínuo nas operações fundamentais.',
       'q-7': 'Foram aplicados jogos didáticos e listas de revisão contextualizadas. Sugiro oficinas de reforço com a equipe pedagógica.',
@@ -322,7 +328,7 @@ export const INITIAL_REPORTS: PreCouncilReport[] = [
     component: 'Língua Portuguesa',
     classGroup: '6º Ano A',
     date: '2026-09-15',
-    bimester: '3º Bimestre',
+    bimester: '3º Trimestre',
     status: 'enviado',
     createdAt: '2026-09-15T09:15:00Z',
     updatedAt: '2026-09-15T09:15:00Z',
@@ -333,7 +339,7 @@ export const INITIAL_REPORTS: PreCouncilReport[] = [
       'q-4': 'Gabriel Alves com frequência irregular nas sextas-feiras.',
       'q-5': 'Isabela e Kauã destacaram-se com produções poéticas premiadas no sarau da escola.',
       'q-6': 'Felipe Martins apresenta bloqueio na escrita espontânea; necessita avaliação com apoio da sala de recursos.',
-      'q-7': 'Trabalhamos oficinas de reescrita em pequenos grupos. Para o 4º bimestre, propomos clube de leitura semanal.',
+      'q-7': 'Trabalhamos oficinas de reescrita em pequenos grupos. Para o próximo período, propomos clube de leitura semanal.',
       'q-8': 'Articular com a direção a reposição de livros didáticos faltantes.',
       'q-9': 'Excelente perspectiva de fechamento anual se mantida a parceria com os responsáveis.',
     },
@@ -354,7 +360,7 @@ export const INITIAL_REPORTS: PreCouncilReport[] = [
     component: 'Matemática',
     classGroup: '7º Ano B',
     date: '2026-09-18',
-    bimester: '3º Bimestre',
+    bimester: '3º Trimestre',
     status: 'pendente',
     createdAt: '2026-09-18T08:00:00Z',
     updatedAt: '2026-09-18T08:00:00Z',
@@ -376,7 +382,7 @@ export const INITIAL_REPORTS: PreCouncilReport[] = [
     component: 'Língua Portuguesa',
     classGroup: '7º Ano B',
     date: '2026-09-18',
-    bimester: '3º Bimestre',
+    bimester: '3º Trimestre',
     status: 'pendente',
     createdAt: '2026-09-18T08:00:00Z',
     updatedAt: '2026-09-18T08:00:00Z',

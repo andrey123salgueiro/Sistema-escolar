@@ -1,7 +1,15 @@
 @import "tailwindcss";
 
 @media print {
+  @page {
+    margin: 12mm;
+  }
+
+  html,
   body {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
     background-color: #ffffff !important;
     color: #1c1917 !important;
     -webkit-print-color-adjust: exact;
@@ -10,6 +18,7 @@
 
   header,
   nav,
+  footer,
   button,
   .print\:hidden {
     display: none !important;

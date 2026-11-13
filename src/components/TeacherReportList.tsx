@@ -75,7 +75,7 @@ export const TeacherReportList: React.FC<TeacherReportListProps> = ({
             </span>
           </div>
           <p className="text-xs text-stone-500 mt-1">
-            Fichas pedagógicas disponibilizadas pela Diretoria para cada turma e bimestre em que você leciona.
+            Fichas pedagógicas disponibilizadas pela Diretoria para cada turma e trimestre em que você leciona.
           </p>
         </div>
 
@@ -107,11 +107,10 @@ export const TeacherReportList: React.FC<TeacherReportListProps> = ({
           onChange={(e) => setSelectedBimester(e.target.value)}
           className="bg-stone-50 border border-stone-300 rounded-lg px-2.5 py-1.5 text-stone-800 focus:ring-2 focus:ring-amber-500 font-medium"
         >
-          <option value="all">Todos os Bimestres</option>
-          <option value="1º Bimestre">1º Bimestre</option>
-          <option value="2º Bimestre">2º Bimestre</option>
-          <option value="3º Bimestre">3º Bimestre</option>
-          <option value="4º Bimestre">4º Bimestre</option>
+          <option value="all">Todos os Trimestres</option>
+          <option value="1º Trimestre">1º Trimestre</option>
+          <option value="2º Trimestre">2º Trimestre</option>
+          <option value="3º Trimestre">3º Trimestre</option>
         </select>
 
         <span className="ml-auto text-stone-600 font-medium text-[11px]">
@@ -182,7 +181,7 @@ export const TeacherReportList: React.FC<TeacherReportListProps> = ({
 
                     <div className="text-xs text-stone-600 space-y-1 my-3 bg-stone-50 p-2.5 rounded-xl border border-stone-100">
                       <div className="flex items-center justify-between">
-                        <span className="text-stone-500">Bimestre:</span>
+                        <span className="text-stone-500">Trimestre:</span>
                         <span className="font-bold text-stone-800">{report.bimester}</span>
                       </div>
                       <div className="flex items-center justify-between">
@@ -268,7 +267,7 @@ export const TeacherReportList: React.FC<TeacherReportListProps> = ({
 
                     <div className="text-xs text-stone-600 space-y-1 my-3 bg-stone-50 p-2.5 rounded-xl border border-stone-100">
                       <div className="flex items-center justify-between">
-                        <span className="text-stone-500">Bimestre:</span>
+                        <span className="text-stone-500">Trimestre:</span>
                         <span className="font-semibold text-stone-800">{report.bimester}</span>
                       </div>
                       <div className="flex items-center justify-between">

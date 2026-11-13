@@ -21,6 +21,7 @@ import {
   BookOpen,
   PieChart,
 } from 'lucide-react';
+import { triggerPrint } from '../utils/print';
 
 interface ClassPerformanceProps {
   classes: SchoolClass[];
@@ -44,6 +45,7 @@ export const ClassPerformance: React.FC<ClassPerformanceProps> = ({
 
   const [selectedClass, setSelectedClass] = useState<string>(defaultClass);
   const [selectedBimester, setSelectedBimester] = useState<string>('all');
+  const [printBlockedNotice, setPrintBlockedNotice] = useState<boolean>(false);
 
   // Filter archived reports (enviado or visto)
   const activeReports = reports.filter((r) => {
@@ -124,7 +126,7 @@ export const ClassPerformance: React.FC<ClassPerformanceProps> = ({
 
   // Students requiring pedagogical attention
   const studentsNeedingAttention = Object.values(studentMap)
-    .filter((s) => s.ruim > 0 || s.regular > 1)
+    .filter((s) => s.ruim > 0 || s.regular > 0)
     .sort((a, b) => b.ruim - a.ruim || b.regular - a.regular);
 
   // Top performing students
@@ -133,7 +135,8 @@ export const ClassPerformance: React.FC<ClassPerformanceProps> = ({
     .sort((a, b) => b.otimo - a.otimo);
 
   const handlePrint = () => {
-    window.print();
+    setPrintBlockedNotice(false);
+    triggerPrint(() => setPrintBlockedNotice(true));
   };
 
   return (
@@ -175,30 +178,30 @@ export const ClassPerformance: React.FC<ClassPerformanceProps> = ({
             </select>
           </div>
 
-          {/* Bimestre filter */}
+          {/* Trimestre filter */}
           <div>
             <label className="block text-[10px] uppercase font-bold text-stone-500 mb-0.5">
-              Bimestre
+              Trimestre
             </label>
             <select
               value={selectedBimester}
               onChange={(e) => setSelectedBimester(e.target.value)}
               className="bg-stone-50 border border-stone-300 rounded-xl px-3 py-1.5 text-xs text-stone-900 focus:bg-white focus:ring-2 focus:ring-amber-500 font-semibold"
             >
-              <option value="all">Todos os Bimestres</option>
-              <option value="1º Bimestre">1º Bimestre</option>
-              <option value="2º Bimestre">2º Bimestre</option>
-              <option value="3º Bimestre">3º Bimestre</option>
-              <option value="4º Bimestre">4º Bimestre</option>
+              <option value="all">Todos os Trimestres</option>
+              <option value="1º Trimestre">1º Trimestre</option>
+              <option value="2º Trimestre">2º Trimestre</option>
+              <option value="3º Trimestre">3º Trimestre</option>
             </select>
           </div>
 
           {/* Print button */}
           <div className="pt-4 sm:pt-0">
             <button
+              type="button"
               onClick={handlePrint}
               id="btn-print-performance"
-              className="flex items-center gap-1.5 px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold transition-colors shadow-xs"
+              className="flex items-center gap-1.5 px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold transition-colors shadow-xs cursor-pointer"
             >
               <Printer className="w-4 h-4 text-amber-400" />
               <span>Imprimir Desempenho</span>
@@ -206,6 +209,21 @@ export const ClassPerformance: React.FC<ClassPerformanceProps> = ({
           </div>
         </div>
       </div>
+
+      {printBlockedNotice && (
+        <div className="bg-amber-50 border border-amber-300 text-amber-900 px-4 py-3 rounded-xl text-xs flex items-center justify-between gap-3 print:hidden">
+          <span>
+            O navegador bloqueou a abertura automática da janela de impressão nesta pré-visualização. Pressione <strong>Ctrl + P</strong> (ou <strong>Cmd + P</strong>) ou abra o sistema em uma nova aba para imprimir.
+          </span>
+          <button
+            type="button"
+            onClick={() => setPrintBlockedNotice(false)}
+            className="font-bold underline shrink-0 cursor-pointer"
+          >
+            Fechar
+          </button>
+        </div>
+      )}
 
       {/* PRINTABLE OFFICIAL PERFORMANCE REPORT */}
       <div id="printable-performance" className="bg-white rounded-2xl border border-stone-200 p-6 sm:p-8 shadow-xs print:p-0 print:border-none print:shadow-none space-y-6">
@@ -235,7 +253,7 @@ export const ClassPerformance: React.FC<ClassPerformanceProps> = ({
             <div>
               <span className="text-stone-500 font-medium">Período:</span>{' '}
               <strong className="text-stone-900">
-                {selectedBimester === 'all' ? 'Todos os Bimestres' : selectedBimester}
+                {selectedBimester === 'all' ? 'Todos os Trimestres' : selectedBimester}
               </strong>
             </div>
             <div>
@@ -352,7 +370,7 @@ export const ClassPerformance: React.FC<ClassPerformanceProps> = ({
             <span>Desempenho por Critério Pedagógico Avaliado</span>
           </h3>
 
-          <div className="border border-stone-200 rounded-xl overflow-hidden shadow-xs">
+          <div className="border border-stone-200 rounded-xl overflow-hidden shadow-xs print:overflow-visible">
             <table className="w-full text-left text-xs">
               <thead className="bg-stone-50 border-b border-stone-200 text-stone-500 uppercase tracking-wider text-[10px] font-semibold">
                 <tr>
@@ -416,7 +434,7 @@ export const ClassPerformance: React.FC<ClassPerformanceProps> = ({
         </div>
 
         {/* Student Lists: Highlights vs Interventions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 page-break-inside-avoid">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 print:block print:space-y-6">
           {/* Attention list */}
           <div className="border border-rose-200 bg-rose-50/30 rounded-xl p-4">
             <h4 className="text-xs font-bold uppercase tracking-wider text-rose-900 mb-2 flex items-center gap-1.5 font-serif">
@@ -432,9 +450,9 @@ export const ClassPerformance: React.FC<ClassPerformanceProps> = ({
                 Nenhum estudante com conceito crítico registrado no período.
               </p>
             ) : (
-              <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+              <div className="space-y-2 max-h-60 overflow-y-auto pr-1 print:max-h-none print:overflow-visible print:pr-0">
                 {studentsNeedingAttention.map((s, idx) => (
-                  <div key={idx} className="bg-white border border-rose-200 rounded-lg p-2.5 text-xs">
+                  <div key={idx} className="bg-white border border-rose-200 rounded-lg p-2.5 text-xs page-break-inside-avoid">
                     <div className="flex items-center justify-between mb-1">
                       <span className="font-bold text-stone-900">{s.name}</span>
                       <span className="text-[10px] font-bold text-stone-600 bg-stone-100 px-1.5 py-0.5 rounded">
@@ -479,16 +497,16 @@ export const ClassPerformance: React.FC<ClassPerformanceProps> = ({
                 Nenhum estudante destaque isolado no filtro selecionado.
               </p>
             ) : (
-              <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
-                {standoutStudents.slice(0, 10).map((s, idx) => (
-                  <div key={idx} className="bg-white border border-emerald-200 rounded-lg p-2.5 text-xs">
+              <div className="space-y-2 max-h-60 overflow-y-auto pr-1 print:max-h-none print:overflow-visible print:pr-0">
+                {standoutStudents.map((s, idx) => (
+                  <div key={idx} className="bg-white border border-emerald-200 rounded-lg p-2.5 text-xs page-break-inside-avoid">
                     <div className="flex items-center justify-between mb-1">
                       <span className="font-bold text-stone-900">{s.name}</span>
                       <span className="text-[10px] font-bold text-stone-600 bg-stone-100 px-1.5 py-0.5 rounded">
                         {s.classGroup}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 text-[10px]">
+                    <div className="flex items-center gap-2 text-[10px] mb-1">
                       <span className="font-bold text-emerald-800 bg-emerald-100 px-1.5 py-0.5 rounded">
                         {s.otimo} Ótimo
                       </span>
@@ -498,6 +516,11 @@ export const ClassPerformance: React.FC<ClassPerformanceProps> = ({
                         </span>
                       )}
                     </div>
+                    {s.notes.length > 0 && (
+                      <p className="text-[10px] text-stone-500 italic">
+                        {s.notes.join(' ; ')}
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>

@@ -110,7 +110,18 @@ export function getStoredReports(): PreCouncilReport[] {
       localStorage.setItem(REPORTS_KEY, JSON.stringify(INITIAL_REPORTS));
       return INITIAL_REPORTS;
     }
-    return JSON.parse(raw);
+    const parsed: PreCouncilReport[] = JSON.parse(raw);
+    return parsed.map((r) => ({
+      ...r,
+      bimester:
+        r.bimester === '1º Bimestre'
+          ? '1º Trimestre'
+          : r.bimester === '2º Bimestre'
+          ? '2º Trimestre'
+          : r.bimester === '3º Bimestre'
+          ? '3º Trimestre'
+          : r.bimester,
+    }));
   } catch (e) {
     console.error('Failed to parse stored reports', e);
     return INITIAL_REPORTS;

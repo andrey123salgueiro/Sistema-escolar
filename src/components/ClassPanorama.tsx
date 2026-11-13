@@ -23,6 +23,7 @@ import {
   Calendar,
   Users,
 } from 'lucide-react';
+import { triggerPrint } from '../utils/print';
 
 interface ClassPanoramaProps {
   classes: SchoolClass[];
@@ -56,6 +57,7 @@ export const ClassPanorama: React.FC<ClassPanoramaProps> = ({
 
   const [selectedClass, setSelectedClass] = useState<string>(initialClass);
   const [selectedBimester, setSelectedBimester] = useState<string>('Todos');
+  const [printBlockedNotice, setPrintBlockedNotice] = useState<boolean>(false);
 
   // Keep selectedClass synchronized if classes list changes or loads
   useEffect(() => {
@@ -137,7 +139,8 @@ export const ClassPanorama: React.FC<ClassPanoramaProps> = ({
   }, [sections]);
 
   const handlePrint = () => {
-    window.print();
+    setPrintBlockedNotice(false);
+    triggerPrint(() => setPrintBlockedNotice(true));
   };
 
   return (
@@ -178,30 +181,30 @@ export const ClassPanorama: React.FC<ClassPanoramaProps> = ({
             </select>
           </div>
 
-          {/* Select Bimestre */}
+          {/* Select Trimestre */}
           <div>
             <label className="block text-[10px] uppercase font-bold text-stone-500 mb-0.5">
-              Bimestre
+              Trimestre
             </label>
             <select
               value={selectedBimester}
               onChange={(e) => setSelectedBimester(e.target.value)}
               className="bg-stone-50 border border-stone-300 rounded-xl px-3 py-1.5 text-xs text-stone-900 focus:bg-white focus:ring-2 focus:ring-amber-500 font-semibold"
             >
-              <option value="Todos">Todos os Bimestres</option>
-              <option value="1º Bimestre">1º Bimestre</option>
-              <option value="2º Bimestre">2º Bimestre</option>
-              <option value="3º Bimestre">3º Bimestre</option>
-              <option value="4º Bimestre">4º Bimestre</option>
+              <option value="Todos">Todos os Trimestres</option>
+              <option value="1º Trimestre">1º Trimestre</option>
+              <option value="2º Trimestre">2º Trimestre</option>
+              <option value="3º Trimestre">3º Trimestre</option>
             </select>
           </div>
 
           {/* Print Button */}
           <div className="pt-4 sm:pt-0">
             <button
+              type="button"
               onClick={handlePrint}
               id="btn-print-panorama"
-              className="flex items-center gap-1.5 px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold transition-colors shadow-xs"
+              className="flex items-center gap-1.5 px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold transition-colors shadow-xs cursor-pointer"
             >
               <Printer className="w-4 h-4 text-amber-400" />
               <span>Imprimir Panorama</span>
@@ -209,6 +212,21 @@ export const ClassPanorama: React.FC<ClassPanoramaProps> = ({
           </div>
         </div>
       </div>
+
+      {printBlockedNotice && (
+        <div className="bg-amber-50 border border-amber-300 text-amber-900 px-4 py-3 rounded-xl text-xs flex items-center justify-between gap-3 print:hidden">
+          <span>
+            O navegador bloqueou a abertura automática da janela de impressão nesta pré-visualização. Pressione <strong>Ctrl + P</strong> (ou <strong>Cmd + P</strong>) ou abra o sistema em uma nova aba para imprimir.
+          </span>
+          <button
+            type="button"
+            onClick={() => setPrintBlockedNotice(false)}
+            className="font-bold underline shrink-0 cursor-pointer"
+          >
+            Fechar
+          </button>
+        </div>
+      )}
 
       {/* PRINTABLE OFFICIAL PANORAMA SHEET */}
       <div
@@ -320,7 +338,7 @@ export const ClassPanorama: React.FC<ClassPanoramaProps> = ({
                 className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-600 text-white font-bold text-xs hover:bg-amber-700 transition-colors"
               >
                 <Filter className="w-3.5 h-3.5" />
-                <span>Ver Todos os Bimestres</span>
+                <span>Ver Todos os Trimestres</span>
               </button>
             )}
           </div>
@@ -482,7 +500,7 @@ export const ClassPanorama: React.FC<ClassPanoramaProps> = ({
 
             {/* Students of the Class */}
             {classStudents.length > 0 && (
-              <div className="border border-stone-200 rounded-xl overflow-hidden page-break-inside-avoid mt-6">
+              <div className="border border-stone-200 rounded-xl overflow-hidden print:overflow-visible mt-6">
                 <div className="bg-stone-50 px-4 py-2.5 border-b border-stone-200 font-bold text-xs text-stone-800 uppercase tracking-wide font-serif flex items-center justify-between">
                   <span>Quadro de Alunos da Turma ({classStudents.length})</span>
                   <span className="text-[11px] text-stone-500 font-sans font-normal">
@@ -514,7 +532,7 @@ export const ClassPanorama: React.FC<ClassPanoramaProps> = ({
                     return (
                       <div
                         key={std.id}
-                        className="p-3 hover:bg-stone-50 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                        className="p-3 hover:bg-stone-50 flex flex-col sm:flex-row sm:items-center justify-between gap-2 page-break-inside-avoid"
                       >
                         <div className="flex items-center gap-2">
                           <span className="w-5 font-mono text-[11px] text-stone-400 font-bold">

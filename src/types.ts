@@ -69,7 +69,7 @@ export interface PreCouncilReport {
   component: string; // Componente Curricular (ex: Matemática)
   classGroup: string; // Turma (ex: 6º Ano A)
   date: string; // Formato YYYY-MM-DD
-  bimester: string; // 1º Bimestre, 2º Bimestre, etc.
+  bimester: string; // 1º Trimestre, 2º Trimestre, 3º Trimestre
   answers: Record<string, string>; // questionId -> response
   // Formulário conceitual: Ruim, Regular, Bom, Ótimo
   dimensionRatings?: Record<string, ConceptRating>; // dimensionId -> rating

@@ -15,6 +15,7 @@ import {
   Clock,
   Send,
 } from 'lucide-react';
+import { triggerPrint } from '../utils/print';
 
 interface ReportViewModalProps {
   report: PreCouncilReport;
@@ -28,6 +29,8 @@ interface ReportViewModalProps {
     notes?: string
   ) => void;
   schoolLogoUrl?: string;
+  autoPrint?: boolean;
+  onAutoPrintDone?: () => void;
 }
 
 export const ReportViewModal: React.FC<ReportViewModalProps> = ({
@@ -38,6 +41,8 @@ export const ReportViewModal: React.FC<ReportViewModalProps> = ({
   onClose,
   onSignReport,
   schoolLogoUrl,
+  autoPrint = false,
+  onAutoPrintDone,
 }) => {
   const [pedagogaNotes, setPedagogaNotes] = useState(
     report.pedagogaSignature?.notes || ''
@@ -46,6 +51,7 @@ export const ReportViewModal: React.FC<ReportViewModalProps> = ({
     report.diretoraSignature?.notes || ''
   );
   const [showNotesForm, setShowNotesForm] = useState(false);
+  const [printBlockedNotice, setPrintBlockedNotice] = useState(false);
 
   // Prevent background scrolling while modal is open
   useEffect(() => {
@@ -56,11 +62,21 @@ export const ReportViewModal: React.FC<ReportViewModalProps> = ({
     };
   }, []);
 
-  const isDiretora = currentUser.role === 'diretora';
-
   const handlePrint = () => {
-    window.print();
+    setPrintBlockedNotice(false);
+    triggerPrint(() => setPrintBlockedNotice(true));
   };
+
+  useEffect(() => {
+    if (!autoPrint) return;
+    const timer = setTimeout(() => {
+      handlePrint();
+      onAutoPrintDone?.();
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [autoPrint, report.id]);
+
+  const isDiretora = currentUser.role === 'diretora';
 
   const handleConfirmDirectorSign = () => {
     onSignReport(report.id, 'diretora', diretoraNotes);
@@ -94,9 +110,9 @@ export const ReportViewModal: React.FC<ReportViewModalProps> = ({
   );
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex justify-center items-start p-2 sm:p-4 py-4 sm:py-8 print:p-0 print:bg-white print:static">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex justify-center items-start p-2 sm:p-4 py-4 sm:py-8 print:p-0 print:bg-white print:static print:block print:overflow-visible">
       {/* Container */}
-      <div className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl border border-stone-200 overflow-hidden my-2 sm:my-4 print:m-0 print:border-none print:shadow-none print:rounded-none">
+      <div className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl border border-stone-200 overflow-hidden my-2 sm:my-4 print:m-0 print:border-none print:shadow-none print:rounded-none print:overflow-visible print:max-w-none">
         {/* Modal Top Bar (Hidden on print) */}
         <div className="sticky top-0 z-20 bg-stone-900 text-stone-100 px-6 py-3 flex items-center justify-between print:hidden shadow-md">
           <div className="flex items-center gap-2 text-xs">
@@ -111,9 +127,10 @@ export const ReportViewModal: React.FC<ReportViewModalProps> = ({
 
           <div className="flex items-center gap-3">
             <button
+              type="button"
               onClick={handlePrint}
               id="btn-print-modal"
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-800 hover:bg-stone-700 text-white rounded-lg text-xs font-semibold transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-800 hover:bg-stone-700 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
             >
               <Printer className="w-3.5 h-3.5 text-amber-400" />
               <span>Imprimir / Salvar PDF</span>
@@ -158,6 +175,21 @@ export const ReportViewModal: React.FC<ReportViewModalProps> = ({
                 </button>
               )}
             </div>
+          </div>
+        )}
+
+        {printBlockedNotice && (
+          <div className="bg-amber-50 border-b border-amber-300 text-amber-900 px-6 py-2.5 text-xs flex items-center justify-between gap-3 print:hidden">
+            <span>
+              O navegador bloqueou a janela de impressão nesta pré-visualização. Pressione <strong>Ctrl + P</strong> ou abra o sistema em uma nova aba para imprimir.
+            </span>
+            <button
+              type="button"
+              onClick={() => setPrintBlockedNotice(false)}
+              className="font-bold underline shrink-0 cursor-pointer"
+            >
+              Fechar
+            </button>
           </div>
         )}
 
@@ -287,7 +319,7 @@ export const ReportViewModal: React.FC<ReportViewModalProps> = ({
               return (
                 <div
                   key={sec.id}
-                  className="border border-stone-300 rounded-xl p-5 bg-stone-50/40 page-break-inside-avoid shadow-xs"
+                  className="border border-stone-300 rounded-xl p-5 bg-stone-50/40 shadow-xs"
                 >
                   <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-stone-900 border-b border-stone-200 pb-2 mb-4 font-serif flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-amber-600 print:bg-black" />
@@ -299,7 +331,7 @@ export const ReportViewModal: React.FC<ReportViewModalProps> = ({
                       const ans = report.answers[q.id];
                       const qNum = questionNumberMap.get(q.id) || q.order;
                       return (
-                        <div key={q.id} className="text-xs leading-relaxed">
+                        <div key={q.id} className="text-xs leading-relaxed page-break-inside-avoid">
                           <div className="flex items-start gap-2 mb-1.5">
                             <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-md bg-amber-100 border border-amber-300 text-amber-900 font-bold text-xs font-sans shrink-0 print:bg-stone-200 print:text-stone-900 print:border-stone-400">
                               Questão {qNum}
@@ -327,7 +359,7 @@ export const ReportViewModal: React.FC<ReportViewModalProps> = ({
 
             {/* Any questions not matching defined sections */}
             {orphanedQuestions.length > 0 && (
-              <div className="border border-stone-300 rounded-xl p-5 bg-stone-50/40 page-break-inside-avoid shadow-xs">
+              <div className="border border-stone-300 rounded-xl p-5 bg-stone-50/40 shadow-xs">
                 <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-stone-900 border-b border-stone-200 pb-2 mb-4 font-serif flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-stone-700 print:bg-black" />
                   Outras Questões Registradas
@@ -337,7 +369,7 @@ export const ReportViewModal: React.FC<ReportViewModalProps> = ({
                     const ans = report.answers[q.id];
                     const qNum = questionNumberMap.get(q.id) || q.order;
                     return (
-                      <div key={q.id} className="text-xs leading-relaxed">
+                      <div key={q.id} className="text-xs leading-relaxed page-break-inside-avoid">
                         <div className="flex items-start gap-2 mb-1.5">
                           <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-md bg-stone-200 border border-stone-300 text-stone-800 font-bold text-xs font-sans shrink-0">
                             Questão {qNum}
@@ -432,8 +464,9 @@ export const ReportViewModal: React.FC<ReportViewModalProps> = ({
 
           <div className="flex items-center gap-3">
             <button
+              type="button"
               onClick={handlePrint}
-              className="flex items-center gap-1.5 px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold transition-colors shadow-xs"
+              className="flex items-center gap-1.5 px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold transition-colors shadow-xs cursor-pointer"
             >
               <Printer className="w-4 h-4 text-amber-400" />
               <span>Imprimir / Salvar PDF</span>

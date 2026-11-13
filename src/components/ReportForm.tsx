@@ -71,7 +71,7 @@ export const ReportForm: React.FC<ReportFormProps> = ({
     activeReport?.date || new Date().toISOString().split('T')[0]
   );
   const [bimester, setBimester] = useState(
-    activeReport?.bimester || '3º Bimestre'
+    activeReport?.bimester || '3º Trimestre'
   );
   const [answers, setAnswers] = useState<Record<string, string>>(
     activeReport?.answers || {}
@@ -227,7 +227,7 @@ export const ReportForm: React.FC<ReportFormProps> = ({
       } else if (q.id === 'q-8') {
         demo[q.id] = 'Recomenda-se reunião de alinhamento com os pais sobre o cumprimento dos prazos de tarefas.';
       } else if (q.id === 'q-9') {
-        demo[q.id] = 'Turma harmoniosa e com forte potencial para os próximos bimestres com o suporte da equipe pedagógica.';
+        demo[q.id] = 'Turma harmoniosa e com forte potencial para os próximos trimestres com o suporte da equipe pedagógica.';
       } else {
         demo[q.id] = `Observações pedagógicas detalhadas sobre ${q.prompt.slice(0, 30)}...`;
       }
@@ -429,11 +429,11 @@ export const ReportForm: React.FC<ReportFormProps> = ({
               </div>
             </div>
 
-            {/* Data & Bimestre */}
+            {/* Data & Trimestre */}
             <div>
               <label className="block text-xs font-semibold text-stone-700 mb-1 flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5 text-stone-500" />
-                Data & Bimestre:
+                Data & Trimestre:
               </label>
               <div className="flex gap-2">
                 <input
@@ -447,7 +447,7 @@ export const ReportForm: React.FC<ReportFormProps> = ({
                     type="text"
                     value={bimester}
                     readOnly
-                    title="Bimestre autorizado e fixado pela Direção Escolar"
+                    title="Trimestre autorizado e fixado pela Direção Escolar"
                     className="w-full bg-stone-100 border border-stone-300 rounded-lg px-2 py-2 pr-12 text-xs text-stone-800 font-bold cursor-not-allowed select-none text-center"
                   />
                   <span className="absolute right-1.5 top-1/2 -translate-y-1/2 inline-flex items-center gap-0.5 text-[9px] font-semibold text-stone-500 bg-stone-200/90 px-1 py-0.5 rounded">

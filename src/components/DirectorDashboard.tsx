@@ -84,7 +84,7 @@ export const DirectorDashboard: React.FC<DirectorDashboardProps> = ({
 
   // Export summary to CSV
   const handleExportCSV = () => {
-    const headers = ['Turma', 'Componente', 'Professor', 'Data', 'Bimestre', 'Status', 'Visto Diretoria'];
+    const headers = ['Turma', 'Componente', 'Professor', 'Data', 'Trimestre', 'Status', 'Visto Diretoria'];
     const rows = filteredReports.map((r) => [
       `"${r.classGroup}"`,
       `"${r.component}"`,
@@ -222,17 +222,16 @@ export const DirectorDashboard: React.FC<DirectorDashboardProps> = ({
             ))}
           </select>
 
-          {/* Bimestre Filter */}
+          {/* Trimestre Filter */}
           <select
             value={selectedBimester}
             onChange={(e) => setSelectedBimester(e.target.value)}
             className="bg-stone-50 border border-stone-300 rounded-lg px-3 py-2 text-xs text-stone-800 focus:ring-2 focus:ring-amber-500"
           >
-            <option value="all">Todos os Bimestres</option>
-            <option value="1º Bimestre">1º Bimestre</option>
-            <option value="2º Bimestre">2º Bimestre</option>
-            <option value="3º Bimestre">3º Bimestre</option>
-            <option value="4º Bimestre">4º Bimestre</option>
+            <option value="all">Todos os Trimestres</option>
+            <option value="1º Trimestre">1º Trimestre</option>
+            <option value="2º Trimestre">2º Trimestre</option>
+            <option value="3º Trimestre">3º Trimestre</option>
           </select>
 
           {/* Status buttons */}
@@ -383,8 +382,9 @@ export const DirectorDashboard: React.FC<DirectorDashboardProps> = ({
                         </button>
 
                         <button
+                          type="button"
                           onClick={() => onPrintReport(report)}
-                          className="p-1.5 text-stone-500 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition-colors inline-flex"
+                          className="p-1.5 text-stone-500 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition-colors inline-flex cursor-pointer"
                           title="Imprimir formato oficial da folha"
                         >
                           <Printer className="w-4 h-4" />

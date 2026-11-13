@@ -43,7 +43,7 @@ export const ReleaseReportManagement: React.FC<ReleaseReportManagementProps> = (
 }) => {
   const availableClassNames =
     classes && classes.length > 0 ? classes.map((c) => c.name) : AVAILABLE_CLASSES;
-  const [bimester, setBimester] = useState('3º Bimestre');
+  const [bimester, setBimester] = useState('3º Trimestre');
   const [releaseMode, setReleaseMode] = useState<'all' | 'specific'>('all');
   const [selectedTeacherId, setSelectedTeacherId] = useState(
     teachers[0]?.id || ''
@@ -253,20 +253,19 @@ export const ReleaseReportManagement: React.FC<ReleaseReportManagementProps> = (
 
           <form onSubmit={handleRelease} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {/* Bimestre */}
+              {/* Trimestre */}
               <div>
                 <label className="block text-xs font-semibold text-stone-700 mb-1">
-                  Bimestre de Referência
+                  Trimestre de Referência
                 </label>
                 <select
                   value={bimester}
                   onChange={(e) => setBimester(e.target.value)}
                   className="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-xs text-stone-900 focus:bg-white focus:ring-2 focus:ring-amber-500 font-medium"
                 >
-                  <option value="1º Bimestre">1º Bimestre</option>
-                  <option value="2º Bimestre">2º Bimestre</option>
-                  <option value="3º Bimestre">3º Bimestre</option>
-                  <option value="4º Bimestre">4º Bimestre</option>
+                  <option value="1º Trimestre">1º Trimestre</option>
+                  <option value="2º Trimestre">2º Trimestre</option>
+                  <option value="3º Trimestre">3º Trimestre</option>
                 </select>
               </div>
 
